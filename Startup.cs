@@ -44,7 +44,7 @@ namespace EventHorizon.Identity.AuthServer
             // });
 
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
-            var identityServerKey = Configuration.GetConnectionString("IdentityServerKey");
+            var identityServerKey = Configuration["IdentityServerKey"];
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             services.AddDbContext<ApplicationDbContext>(options =>
