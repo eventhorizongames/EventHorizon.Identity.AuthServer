@@ -1,0 +1,1 @@
+docker run -v ./appsettings.json:/app/appsettings.Production.json --entrypoint "dotnet EventHorizon.Identity.AuthServer.dll /initdb" ehz/identity/authserver
