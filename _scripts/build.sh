@@ -1,1 +1,1 @@
-docker build -t ehz/identity/authserver .
+docker build -t ehz/identity/authserver ..
