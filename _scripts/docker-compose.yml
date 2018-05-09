@@ -9,7 +9,8 @@ services:
       LETSENCRYPT_EMAIL: cody.anhorn@hotmail.com
       ASPNETCORE_ENVIRONMENT: Production
     ports:
-      - "23500:5000"
+      - "23500:80"
     volumes:
-      - ./appsettings.json:/app/appsettings.Production.json
+      - ./appsettings.Production.json:/app/appsettings.Production.json
+      - ~/EventHorizon.Keys/AuthServer/certificate.pfx:/app/certificate.pfx
     network_mode: "bridge"
