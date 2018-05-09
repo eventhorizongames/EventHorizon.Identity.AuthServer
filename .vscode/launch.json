@@ -36,6 +36,39 @@
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
             }
+        },
+        {
+            "name": "Prod .NET Core Launch (web)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.0/EventHorizon.Identity.AuthServer.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart",
+            "launchBrowser": {
+                "enabled": true,
+                "args": "http://authserver.com:5000",
+                "windows": {
+                    "command": "cmd.exe",
+                    "args": "/C start http://authserver.com:5000"
+                },
+                "osx": {
+                    "command": "open"
+                },
+                "linux": {
+                    "command": "xdg-open"
+                }
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Production",
+                "ASPNETCORE_URLS": "http://authserver.com:5000"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Views"
+            }
         }
     ]
 }

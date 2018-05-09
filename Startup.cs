@@ -1,9 +1,9 @@
-﻿// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-using System;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using EventHorizon.Identity;
 using EventHorizon.Identity.AuthServer.Application;
 using EventHorizon.Identity.AuthServer.Identity;
@@ -44,7 +44,6 @@ namespace EventHorizon.Identity.AuthServer
             // });
 
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
-            var identityServerKey = Configuration["IdentityServerKey"];
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             services.AddDbContext<ApplicationDbContext>(options =>
@@ -101,11 +100,9 @@ namespace EventHorizon.Identity.AuthServer
             else
             {
                 identityServer.AddSigningCredential(
-                    new SigningCredentials(
-                        new SymmetricSecurityKey(
-                            Convert.FromBase64String(identityServerKey)
-                        ),
-                        SecurityAlgorithms.HmacSha256
+                    new X509Certificate2(
+                        Path.Combine(Directory.GetCurrentDirectory(), "certificate.pfx"),
+                        Configuration["IdentityServerKeyPassword"]
                     )
                 );
             }

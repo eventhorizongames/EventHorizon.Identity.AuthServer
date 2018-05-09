@@ -289,3 +289,5 @@ __pycache__/
 
 # Identity Temp File
 tempkey.rsa
+
+appsettings.*.json
