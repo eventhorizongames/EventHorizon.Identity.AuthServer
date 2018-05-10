@@ -9,6 +9,7 @@ using EventHorizon.Identity.AuthServer.Application;
 using EventHorizon.Identity.AuthServer.Identity;
 using EventHorizon.Identity.AuthServer.Models;
 using EventHorizon.Identity.AuthServer.Services;
+using EventHorizon.Identity.AuthServer.Services.User;
 using IdentityServer4;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
@@ -36,12 +37,6 @@ namespace EventHorizon.Identity.AuthServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-
-            // services.Configure<IISOptions>(iis =>
-            // {
-            //     iis.AuthenticationDisplayName = "Windows";
-            //     iis.AutomaticAuthentication = false;
-            // });
 
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
@@ -81,18 +76,6 @@ namespace EventHorizon.Identity.AuthServer
                 })
                 .AddAspNetIdentity<ApplicationUser>();
 
-            var auth = services.AddAuthentication();
-
-            // auth.AddGoogle(options =>
-            // {
-            //     options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-
-            //     options.ClientId = "708996912208-9m4dkjb5hscn7cjrn5u0r4tbgkbj1fko.apps.googleusercontent.com";
-            //     options.ClientSecret = "wdfPY6t8H8cecgjlxud__4Gh";
-            // });
-
-            services.AddScoped<IEmailSender, EmailSender>();
-
             if (Environment.IsDevelopment())
             {
                 identityServer.AddDeveloperSigningCredential();
@@ -106,6 +89,11 @@ namespace EventHorizon.Identity.AuthServer
                     )
                 );
             }
+
+            services.AddAuthentication();
+
+            services.AddScoped<IEmailSender, EmailSender>()
+                .AddScoped<IUserCreation, UserCreation>();
         }
 
         public void Configure(IApplicationBuilder app)

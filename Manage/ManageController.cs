@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using EventHorizon.Identity.AuthServer.Manage.Models;
 using EventHorizon.Identity.AuthServer.Models;
 using EventHorizon.Identity.AuthServer.Services;
+using EventHorizon.Identity.AuthServer.Services.User;
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -26,6 +27,7 @@ namespace EventHorizon.Identity.AuthServer.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
+        private readonly IUserCreation _userCreation;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -35,13 +37,15 @@ namespace EventHorizon.Identity.AuthServer.Controllers
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
             ILogger<ManageController> logger,
-            UrlEncoder urlEncoder)
+            UrlEncoder urlEncoder,
+            IUserCreation userCreation)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
             _urlEncoder = urlEncoder;
+            _userCreation = userCreation;
         }
 
         [TempData]
@@ -56,11 +60,17 @@ namespace EventHorizon.Identity.AuthServer.Controllers
                 throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
             }
 
+            var claimList = await _userManager.GetClaimsAsync(user);
             var model = new IndexViewModel
             {
                 Username = user.UserName,
                 Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
+                Profile = new ProfileModel
+                {
+                    PhoneNumber = user.PhoneNumber,
+                    FirstName = claimList.FirstOrDefault(a => a.Type == JwtClaimTypes.GivenName)?.Value,
+                    LastName = claimList.FirstOrDefault(a => a.Type == JwtClaimTypes.FamilyName)?.Value
+                },
                 IsEmailConfirmed = user.EmailConfirmed,
                 StatusMessage = StatusMessage
             };
@@ -94,20 +104,27 @@ namespace EventHorizon.Identity.AuthServer.Controllers
             }
 
             var phoneNumber = user.PhoneNumber;
-            if (model.PhoneNumber != phoneNumber)
+            if (model.Profile.PhoneNumber != phoneNumber)
             {
-                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, model.PhoneNumber);
+                var setPhoneResult = await _userManager.SetPhoneNumberAsync(user, model.Profile.PhoneNumber);
                 if (!setPhoneResult.Succeeded)
                 {
                     throw new ApplicationException($"Unexpected error occurred setting phone number for user with ID '{user.Id}'.");
                 }
             }
 
-            var claimList = await _userManager.GetClaimsAsync(user);
-            await ReplaceClaim(claimList, user, JwtClaimTypes.Name, model.FirstName + " " + model.LastName);
-            await ReplaceClaim(claimList, user, JwtClaimTypes.GivenName, model.FirstName);
-            await ReplaceClaim(claimList, user, JwtClaimTypes.FamilyName, model.LastName);
-            await ReplaceClaim(claimList, user, JwtClaimTypes.Email, model.Email);
+            await _userCreation.ReplaceClaims(user, new ApplicationUserProfile
+            {
+                FirstName = model.Profile.FirstName,
+                LastName = model.Profile.LastName,
+                PhoneNumber = model.Profile.PhoneNumber
+            });
+
+            // var claimList = await _userManager.GetClaimsAsync(user);
+            // await ReplaceClaim(claimList, user, JwtClaimTypes.Name, model.Profile?.FirstName + " " + model.Profile?.LastName);
+            // await ReplaceClaim(claimList, user, JwtClaimTypes.GivenName, model.Profile.FirstName);
+            // await ReplaceClaim(claimList, user, JwtClaimTypes.FamilyName, model.Profile.LastName);
+            // await ReplaceClaim(claimList, user, JwtClaimTypes.Email, model.Email);
             // new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
             // new Claim(JwtClaimTypes.WebSite, "http://alice.com"),
             // new Claim(JwtClaimTypes.Address, @"{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }", IdentityServer4.IdentityServerConstants.ClaimValueTypes.Json)
@@ -196,7 +213,7 @@ namespace EventHorizon.Identity.AuthServer.Controllers
                 return View(model);
             }
 
-            await _signInManager.SignInAsync(user, isPersistent : false);
+            await _signInManager.SignInAsync(user, isPersistent: false);
             _logger.LogInformation("User changed their password successfully.");
             StatusMessage = "Your password has been changed.";
 
@@ -245,7 +262,7 @@ namespace EventHorizon.Identity.AuthServer.Controllers
                 return View(model);
             }
 
-            await _signInManager.SignInAsync(user, isPersistent : false);
+            await _signInManager.SignInAsync(user, isPersistent: false);
             StatusMessage = "Your password has been set.";
 
             return RedirectToAction(nameof(SetPassword));
@@ -362,7 +379,7 @@ namespace EventHorizon.Identity.AuthServer.Controllers
         [HttpGet]
         public IActionResult ShowRecoveryCodes()
         {
-            var recoveryCodes = (string[]) TempData[RecoveryCodesKey];
+            var recoveryCodes = (string[])TempData[RecoveryCodesKey];
             if (recoveryCodes == null)
             {
                 return RedirectToAction(nameof(TwoFactorAuthentication));

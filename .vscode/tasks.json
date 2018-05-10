@@ -10,6 +10,21 @@
                 "${workspaceFolder}/EventHorizon.Identity.AuthServer.csproj"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "options": {
+                "env": {
+                    "ASPNETCORE_ENVIRONMENT": "Development"
+                }
+            },
+            "label": "initDB",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "run",
+                "/initdb"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }

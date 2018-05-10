@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using EventHorizon.Identity.AuthServer.Models;
 
 namespace EventHorizon.Identity.AuthServer.Register
 {
@@ -23,5 +24,7 @@ namespace EventHorizon.Identity.AuthServer.Register
         [Display(Name = "Confirm password")]
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
+
+        public ProfileModel Profile { get; set; } = new ProfileModel();
     }
 }
