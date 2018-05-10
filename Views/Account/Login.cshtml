@@ -44,7 +44,7 @@
                                     <button class="btn btn-default" name="button" value="cancel">Cancel</button>
                                 </div>
                                 <div class="form-group">
-                                    <a asp-controller="Register" asp-action="" asp-route-returnurl="@ViewData["ReturnUrl"]">@("Register as a new user?")</a>
+                                    <a asp-controller="Register" asp-action="" asp-route-returnurl="@Model.ReturnUrl">@("Register as a new user?")</a>
                                 </div>
                             </fieldset>
                         </form>
