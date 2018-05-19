@@ -10,6 +10,7 @@ using EventHorizon.Identity.AuthServer.Models;
 using EventHorizon.Identity.AuthServer.Services;
 using EventHorizon.Identity.AuthServer.Services.User;
 using IdentityModel;
+using MediatR;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -27,7 +28,7 @@ namespace EventHorizon.Identity.AuthServer.Controllers
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly UrlEncoder _urlEncoder;
-        private readonly IUserCreation _userCreation;
+        private readonly IMediator _mediator;
 
         private const string AuthenticatorUriFormat = "otpauth://totp/{0}:{1}?secret={2}&issuer={0}&digits=6";
         private const string RecoveryCodesKey = nameof(RecoveryCodesKey);
@@ -38,14 +39,14 @@ namespace EventHorizon.Identity.AuthServer.Controllers
             IEmailSender emailSender,
             ILogger<ManageController> logger,
             UrlEncoder urlEncoder,
-            IUserCreation userCreation)
+            IMediator mediator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
             _urlEncoder = urlEncoder;
-            _userCreation = userCreation;
+            _mediator = mediator;
         }
 
         [TempData]
@@ -113,11 +114,15 @@ namespace EventHorizon.Identity.AuthServer.Controllers
                 }
             }
 
-            await _userCreation.ReplaceClaims(user, new ApplicationUserProfile
+            await _mediator.Publish(new UserSetProfileClaimsEvent
             {
-                FirstName = model.Profile.FirstName,
-                LastName = model.Profile.LastName,
-                PhoneNumber = model.Profile.PhoneNumber
+                User = user,
+                Profile = new ApplicationUserProfile
+                {
+                    FirstName = model.Profile.FirstName,
+                    LastName = model.Profile.LastName,
+                    PhoneNumber = model.Profile.PhoneNumber
+                }
             });
 
             // var claimList = await _userManager.GetClaimsAsync(user);

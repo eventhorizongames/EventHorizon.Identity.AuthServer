@@ -15,7 +15,7 @@ namespace EventHorizon.Identity.AuthServer.Migrations.ApplicationDb
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Changed = table.Column<string>(maxLength: 2048, nullable: true),
+                    Changed = table.Column<string>( maxLength: 4000, nullable: true),
                     Created = table.Column<DateTime>(nullable: false),
                     Kind = table.Column<int>(nullable: false),
                     RowId = table.Column<string>(maxLength: 50, nullable: false),

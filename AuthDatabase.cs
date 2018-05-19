@@ -1,13 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using EventHorizon.Identity.AuthServer.Application;
+using EventHorizon.Identity.AuthServer.Configuration;
+using EventHorizon.Identity.AuthServer.Services.Claims;
+using EventHorizon.Identity.AuthServer.Services.Role;
+using EventHorizon.Identity.AuthServer.Services.User;
 using IdentityServer4;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace EventHorizon.Identity.AuthServer
@@ -16,39 +24,127 @@ namespace EventHorizon.Identity.AuthServer
     {
         public static void InitializeDatabase(IServiceProvider services)
         {
-            using(var serviceScope = services.GetService<IServiceScopeFactory>().CreateScope())
+            using (var serviceScope = services.GetService<IServiceScopeFactory>().CreateScope())
             {
-                serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>().Database.Migrate();
+                MigrateApplication(serviceScope);
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
+                MigrateConfiguration(serviceScope);
+            }
+        }
 
-                var context = serviceScope.ServiceProvider.GetRequiredService<ConfigurationDbContext>();
-                context.Database.Migrate();
-                if (!context.Clients.Any())
-                {
-                    foreach (var client in GetClients())
-                    {
-                        context.Clients.Add(client.ToEntity());
-                    }
-                    context.SaveChanges();
-                }
+        private static void MigrateApplication(IServiceScope serviceScope)
+        {
+            var env = serviceScope.ServiceProvider.GetRequiredService<IHostingEnvironment>();
+            var auth = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var mediator = serviceScope.ServiceProvider.GetRequiredService<IMediator>();
+            auth.Database.Migrate();
 
-                if (!context.IdentityResources.Any())
-                {
-                    foreach (var resource in GetIdentityResources())
-                    {
-                        context.IdentityResources.Add(resource.ToEntity());
-                    }
-                    context.SaveChanges();
-                }
+            var config = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+              .AddJsonFile("admins.json")
+              .AddJsonFile($"admins.{env.EnvironmentName}.json", true)
+              .AddEnvironmentVariables()
+              .Build();
 
-                if (!context.ApiResources.Any())
+            // Create Admin Roles
+            mediator.Send(new RoleCreateEvent
+            {
+                RoleName = UserRoles.ADMIN
+            }).GetAwaiter().GetResult();
+            mediator.Send(new RoleAddClaimEvent
+            {
+                RoleName = UserRoles.ADMIN,
+                Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.create"),
+            }).GetAwaiter().GetResult();
+            mediator.Send(new RoleAddClaimEvent
+            {
+                RoleName = UserRoles.ADMIN,
+                Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.update"),
+            }).GetAwaiter().GetResult();
+            mediator.Send(new RoleAddClaimEvent
+            {
+                RoleName = UserRoles.ADMIN,
+                Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.view"),
+            }).GetAwaiter().GetResult();
+
+            // Create Admins
+            var admins = new AdminUserConfiguration();
+            config.Bind(admins);
+            foreach (var admin in admins.Admins)
+            {
+                var adminUser = auth.Users.FirstOrDefault(a => a.Email == admin.Email);
+                if (adminUser == null)
                 {
-                    foreach (var resource in GetApiResources())
+                    var result = mediator.Send(new UserCreateEvent
                     {
-                        context.ApiResources.Add(resource.ToEntity());
+                        User = new Models.ApplicationUser
+                        {
+                            UserName = admin.Email,
+                            Email = admin.Email,
+                        },
+                        Profile = new Models.ApplicationUserProfile
+                        {
+
+                        },
+                        Password = admin.Password,
+                    }).GetAwaiter().GetResult();
+                    if (result.Succeeded)
+                    {
+                        adminUser = auth.Users.FirstOrDefault(a => a.Email == admin.Email);
                     }
-                    context.SaveChanges();
+                    else
+                    {
+                        continue;
+                    }
                 }
+                mediator.Publish(new UserAddToRoleEvent
+                {
+                    User = adminUser,
+                    Role = UserRoles.ADMIN
+                }).GetAwaiter().GetResult();
+            }
+
+        }
+
+        private class AdminUserConfiguration
+        {
+            public List<AdminUser> Admins { get; set; }
+        }
+        private class AdminUser
+        {
+            public string Email { get; set; }
+            public string Password { get; set; }
+        }
+
+        private static void MigrateConfiguration(IServiceScope serviceScope)
+        {
+            var context = serviceScope.ServiceProvider.GetRequiredService<HistoryExtendedConfigurationDbContext>();
+            context.Database.Migrate();
+            if (!context.Clients.Any())
+            {
+                foreach (var client in GetClients())
+                {
+                    context.Clients.Add(client.ToEntity());
+                }
+                context.SaveChanges();
+            }
+
+            if (!context.IdentityResources.Any())
+            {
+                foreach (var resource in GetIdentityResources())
+                {
+                    context.IdentityResources.Add(resource.ToEntity());
+                }
+                context.SaveChanges();
+            }
+
+            if (!context.ApiResources.Any())
+            {
+                foreach (var resource in GetApiResources())
+                {
+                    context.ApiResources.Add(resource.ToEntity());
+                }
+                context.SaveChanges();
             }
         }
         private static IEnumerable<IdentityResource> GetIdentityResources()
@@ -133,7 +229,7 @@ namespace EventHorizon.Identity.AuthServer
 
                 AllowedScopes = { "openid", "profile", "api1" }
             };
-            return new []
+            return new[]
             {
                 credentialsClient,
 

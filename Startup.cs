@@ -6,13 +6,16 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using EventHorizon.Identity;
 using EventHorizon.Identity.AuthServer.Application;
+using EventHorizon.Identity.AuthServer.Configuration;
 using EventHorizon.Identity.AuthServer.Identity;
 using EventHorizon.Identity.AuthServer.Models;
 using EventHorizon.Identity.AuthServer.Services;
+using EventHorizon.Identity.AuthServer.Services.Claims;
 using EventHorizon.Identity.AuthServer.Services.User;
 using IdentityServer4;
 using IdentityServer4.EntityFramework.DbContexts;
 using IdentityServer4.EntityFramework.Mappers;
+using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -36,6 +39,7 @@ namespace EventHorizon.Identity.AuthServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
             services.AddMvc();
 
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
@@ -57,7 +61,7 @@ namespace EventHorizon.Identity.AuthServer
                 })
                 // .AddTestUsers(TestUsers.Users)
                 // this adds the config data from DB (clients, resources, CORS)
-                .AddConfigurationStore(options =>
+                .AddConfigurationStore<HistoryExtendedConfigurationDbContext>(options =>
                 {
                     options.ConfigureDbContext = builder =>
                         builder.UseSqlServer(connectionString,
@@ -92,8 +96,13 @@ namespace EventHorizon.Identity.AuthServer
 
             services.AddAuthentication();
 
-            services.AddScoped<IEmailSender, EmailSender>()
-                .AddScoped<IUserCreation, UserCreation>();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Identity Admin",
+                    policy => policy.RequireClaim(IdentityClaimTypes.PERMISSION, "identity.view", "identity.create", "identity.update"));
+            });
+
+            services.AddScoped<IEmailSender, EmailSender>();
         }
 
         public void Configure(IApplicationBuilder app)
@@ -107,6 +116,7 @@ namespace EventHorizon.Identity.AuthServer
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+            AuthDatabase.InitializeDatabase(app.ApplicationServices);
 
             app.UseIdentityServer();
 

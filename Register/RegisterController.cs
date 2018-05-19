@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MediatR;
 
 namespace EventHorizon.Identity.AuthServer.Register
 {
@@ -25,20 +26,20 @@ namespace EventHorizon.Identity.AuthServer.Register
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
-        private readonly IUserCreation _userCreation;
+        private readonly IMediator _mediator;
 
         public RegisterController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
             ILogger<RegisterController> logger,
-            IUserCreation userCreation)
+            IMediator mediator)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
-            _userCreation = userCreation;
+            _mediator = mediator;
         }
 
         [TempData]
@@ -78,15 +79,18 @@ namespace EventHorizon.Identity.AuthServer.Register
                     UserName = model.Email,
                     Email = model.Email
                 };
-                var result = await _userCreation.Create(
-                    user,
-                    new ApplicationUserProfile
+                var result = await _mediator.Send(
+                    new UserCreateEvent
                     {
-                        PhoneNumber = model.Profile.PhoneNumber,
-                        FirstName = model.Profile.FirstName,
-                        LastName = model.Profile.LastName,
-                    },
-                    model.Password);
+                        User = user,
+                        Profile = new ApplicationUserProfile
+                        {
+                            PhoneNumber = model.Profile.PhoneNumber,
+                            FirstName = model.Profile.FirstName,
+                            LastName = model.Profile.LastName,
+                        },
+                        Password = model.Password
+                    });
 
                 if (result.Succeeded)
                 {

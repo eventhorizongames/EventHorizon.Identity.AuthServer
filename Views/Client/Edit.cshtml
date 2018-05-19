@@ -1,0 +1,148 @@
+@model ClientModel
+@using IdentityServer4
+@using IdentityServer4.Models
+
+<div class="container">
+    <a asp-controller="Client" asp-action="">< Back to Client List</a>
+    <h3>@Model.Entity.ClientName (@Model.Entity.ClientId)</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Details</h3>
+            <form method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input type="hidden" asp-for="ClientId" />
+                <div class="form-group">
+                    <label asp-for="ClientName"></label>
+                    <input asp-for="ClientName" class="form-control" placeholder="@Model.Entity.ClientName" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="FrontChannelLogoutUri"></label>
+                    <input asp-for="FrontChannelLogoutUri" class="form-control" placeholder="@Model.Entity.FrontChannelLogoutUri" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="AllowOfflineAccess">
+                        <input asp-for="AllowOfflineAccess">
+                        <strong>Allow Offline Access</strong>
+                    </label>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AllowAccessTokensViaBrowser">
+                        <input asp-for="AllowAccessTokensViaBrowser">
+                        <strong>Allow Access Tokens Via Browser</strong>
+                    </label>
+                </div>
+                <button type="submit" class="btn btn-default">Save</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <h3>Client Secrets</h3>
+            @foreach (var secret in Model.Entity.ClientSecrets)
+            {
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@secret.Id" asp-action="RemoveSecret">
+                <div>@secret.Description @secret.Type @secret.Expiration <button class="btn btn-link" type="submit">Remove</button></div>
+            </form>
+            }
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-action="AddSecret">
+                <div class="form-group">
+                    <label for="Description">Description</label>
+                    <input name="Description" class="form-control" placeholder="Description" />
+                </div>
+                <div class="form-group">
+                    <label for="Value">Secret Key</label>
+                    <input name="Value" class="form-control" placeholder="Secret Key" />
+                </div>
+                <button class="btn btn-default" type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Grant Types</h3>
+            @foreach (var grant in Model.Entity.AllowedGrantTypes)
+            {
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@grant.Id" asp-action="RemoveGrant">
+                <div>@grant.GrantType <button class="btn btn-link" type="submit">Remove</button></div>
+            </form>
+            }
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-action="AddGrant">
+                <div class="form-group">
+                    <label for="grantTypeSelect">New Grant Type</label>
+                    <select name="grantTypeSelect" class="form-control">
+                        <option value="@GrantType.Implicit">Implicit (@GrantType.Implicit)</option>
+                        <option value="@GrantType.Hybrid">Hybrid (@GrantType.Hybrid)</option>
+                        <option value="@GrantType.AuthorizationCode">Authorization Code (@GrantType.AuthorizationCode)</option>
+                        <option value="@GrantType.ClientCredentials">Client Credentials (@GrantType.ClientCredentials)</option>
+                        <option value="@GrantType.ResourceOwnerPassword">Resource Owner Password (@GrantType.ResourceOwnerPassword)</option>
+                    </select>
+                </div>
+                <button class="btn btn-default" type="submit">Add</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <h3>Scopes</h3>
+            @foreach (var scope in Model.Entity.AllowedScopes)
+            {
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@scope.Id" asp-action="RemoveScope">
+                <div>@scope.Scope <button class="btn btn-link" type="submit">Remove</button></div>
+            </form>
+            }
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-action="AddScope">
+                <div class="form-group">
+                    <label for="Scope">New Scope</label>
+                    <input name="Scope" class="form-control" placeholder="New Scope" />                    
+                </div>
+                <button class="btn btn-default" type="submit">Add</button>
+            </form>
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-action="AddScope">
+                <div class="form-group">
+                    <label for="Scope">New Scope Select</label>
+                    <select name="Scope" class="form-control">
+                        <option value="@IdentityServerConstants.StandardScopes.OpenId">Open Id (@IdentityServerConstants.StandardScopes.OpenId)</option>
+                        <option value="@IdentityServerConstants.StandardScopes.Profile">Profile (@IdentityServerConstants.StandardScopes.Profile)</option>
+                        <option value="@IdentityServerConstants.StandardScopes.Email">Email (@IdentityServerConstants.StandardScopes.Email)</option>
+                        <option value="@IdentityServerConstants.StandardScopes.Address">Address (@IdentityServerConstants.StandardScopes.Address)</option>
+                        <option value="@IdentityServerConstants.StandardScopes.Phone">Phone (@IdentityServerConstants.StandardScopes.Phone)</option>
+                        <option value="@IdentityServerConstants.StandardScopes.OfflineAccess">Offline Access (@IdentityServerConstants.StandardScopes.OfflineAccess)</option>
+                    </select>
+                </div>
+                <button class="btn btn-default" type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Post Logout Redirect Uris</h3>
+            @foreach (var uri in Model.Entity.PostLogoutRedirectUris)
+            {
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@uri.Id" asp-action="RemovePostLogoutRedirectUri">
+                <div>@uri.PostLogoutRedirectUri <button class="btn btn-link" type="submit">Remove</button></div>
+            </form>
+            }
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-action="AddPostLogoutRedirectUri">
+                <div class="form-group">
+                    <label for="PostLogoutRedirectUri">New Post Logout Redirect Uri</label>
+                    <input name="PostLogoutRedirectUri" class="form-control" placeholder="New Post Logout Redirect Uri" />                    
+                </div>
+                <button class="btn btn-default" type="submit">Add</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <h3>Redirect Uris</h3>
+            @foreach (var uri in Model.Entity.RedirectUris)
+            {
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@uri.Id" asp-action="RemoveRedirectUri">
+                <div>@uri.RedirectUri <button class="btn btn-link" type="submit">Remove</button></div>
+            </form>
+            }
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-action="AddRedirectUri">
+                <div class="form-group">
+                    <label for="RedirectUri">New Redirect Uri</label>
+                    <input name="RedirectUri" class="form-control" placeholder="New Redirect Uri" />                    
+                </div>
+                <button class="btn btn-default" type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+</div>

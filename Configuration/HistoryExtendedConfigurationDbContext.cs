@@ -1,18 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using EventHorizon.Identity.AuthServer.Models;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.EntityFramework.Entities;
+using IdentityServer4.EntityFramework.Options;
 using Microsoft.EntityFrameworkCore;
 
-namespace EventHorizon.Identity.AuthServer.Application
+namespace EventHorizon.Identity.AuthServer.Configuration
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class HistoryExtendedConfigurationDbContext : ConfigurationDbContext<HistoryExtendedConfigurationDbContext>
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
-            : base(options)
+        public DbSet<ClientGrantType> ClientGrantTypes { get; set; }
+        public DbSet<ClientSecret> ClientSecrets { get; set; }
+        public DbSet<ClientRedirectUri> ClientRedirectUris { get; set; }
+        public DbSet<ClientPostLogoutRedirectUri> ClientPostLogoutRedirectUris { get; set; }
+        public DbSet<ClientCorsOrigin> ClientCorsOrigins { get; set; }
+        public DbSet<ClientScope> ClientScopes { get; set; }
+        
+        public HistoryExtendedConfigurationDbContext(DbContextOptions<HistoryExtendedConfigurationDbContext> options, ConfigurationStoreOptions storeOptions)
+            : base(options, storeOptions)
         {
         }
 

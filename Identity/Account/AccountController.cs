@@ -121,69 +121,71 @@ namespace EventHorizon.Identity.AuthServer.Identity
 
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(model.Username, model.Password, model.RememberLogin, lockoutOnFailure : false);
-                if (result.Succeeded)
+                // validate username/password against in-memory store
+                var user = await _userManager.FindByEmailAsync(model.Username);
+
+                if (user != null)
                 {
-                    // validate username/password against in-memory store
-                    var user = await _userManager.FindByEmailAsync(model.Username);
-
-                    if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+                    if (!result.Succeeded)
                     {
-                        await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName));
-
-                        // only set explicit expiration here if user chooses "remember me". 
-                        // otherwise we rely upon expiration configured in cookie middleware.
-                        AuthenticationProperties props = null;
-                        if (AccountOptions.AllowRememberLogin && model.RememberLogin)
+                        if (result.RequiresTwoFactor)
                         {
-                            props = new AuthenticationProperties
-                            {
-                                IsPersistent = true,
-                                ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
-                            };
-                        };
-
-                        // issue authentication cookie with subject ID and username
-                        await HttpContext.SignInAsync(user.Id, user.UserName, props);
-
-                        if (context != null)
-                        {
-                            if (await _clientStore.IsPkceClientAsync(context.ClientId))
-                            {
-                                // if the client is PKCE then we assume it's native, so this change in how to
-                                // return the response is for better UX for the end user.
-                                return View("Redirect", new RedirectViewModel { RedirectUrl = model.ReturnUrl });
-                            }
-
-                            // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                            return Redirect(model.ReturnUrl);
+                            return RedirectToAction(nameof(LoginWith2fa), new { model.ReturnUrl, model.RememberLogin });
                         }
-
-                        // request for a local page
-                        if (Url.IsLocalUrl(model.ReturnUrl))
+                        if (result.IsLockedOut)
                         {
-                            return Redirect(model.ReturnUrl);
-                        }
-                        else if (string.IsNullOrEmpty(model.ReturnUrl))
-                        {
-                            return Redirect("~/");
-                        }
-                        else
-                        {
-                            // user might have clicked on a malicious link - should be logged
-                            throw new Exception("invalid return URL");
+                            _logger.LogWarning("User account locked out.");
+                            return RedirectToAction(nameof(Lockout));
                         }
                     }
+
+                    // only set explicit expiration here if user chooses "remember me". 
+                    // otherwise we rely upon expiration configured in cookie middleware.
+                    AuthenticationProperties props = null;
+                    if (AccountOptions.AllowRememberLogin && model.RememberLogin)
+                    {
+                        props = new AuthenticationProperties
+                        {
+                            IsPersistent = true,
+                            ExpiresUtc = DateTimeOffset.UtcNow.Add(AccountOptions.RememberMeLoginDuration)
+                        };
+                    };
+
+                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.UserName, user.Id, user.UserName));
+                    // issue authentication cookie with subject ID and username
+                    // await HttpContext.SignInAsync(user.Id, user.UserName, props);
+                    await _signInManager.SignInAsync(user, props);
+
+                    if (context != null)
+                    {
+                        if (await _clientStore.IsPkceClientAsync(context.ClientId))
+                        {
+                            // if the client is PKCE then we assume it's native, so this change in how to
+                            // return the response is for better UX for the end user.
+                            return View("Redirect", new RedirectViewModel { RedirectUrl = model.ReturnUrl });
+                        }
+
+                        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+                        return Redirect(model.ReturnUrl);
+                    }
+
+                    // request for a local page
+                    if (Url.IsLocalUrl(model.ReturnUrl))
+                    {
+                        return Redirect(model.ReturnUrl);
+                    }
+                    else if (string.IsNullOrEmpty(model.ReturnUrl))
+                    {
+                        return Redirect("~/");
+                    }
+                    else
+                    {
+                        // user might have clicked on a malicious link - should be logged
+                        throw new Exception("invalid return URL");
+                    }
                 }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToAction(nameof(LoginWith2fa), new { model.ReturnUrl, model.RememberLogin });
-                }
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToAction(nameof(Lockout));
-                }
+
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Username, "invalid credentials"));
                 ModelState.AddModelError("", AccountOptions.InvalidCredentialsErrorMessage);
@@ -333,10 +335,10 @@ namespace EventHorizon.Identity.AuthServer.Identity
                 // this is meant to short circuit the UI and only trigger the one external IdP
                 return new LoginViewModel
                 {
-                EnableLocalLogin = false,
-                ReturnUrl = returnUrl,
-                Username = context?.LoginHint,
-                ExternalProviders = new ExternalProvider[] { new ExternalProvider { AuthenticationScheme = context.IdP } }
+                    EnableLocalLogin = false,
+                    ReturnUrl = returnUrl,
+                    Username = context?.LoginHint,
+                    ExternalProviders = new ExternalProvider[] { new ExternalProvider { AuthenticationScheme = context.IdP } }
                 };
             }
 
@@ -349,7 +351,7 @@ namespace EventHorizon.Identity.AuthServer.Identity
                 .Select(x => new ExternalProvider
                 {
                     DisplayName = x.DisplayName,
-                        AuthenticationScheme = x.Name
+                    AuthenticationScheme = x.Name
                 }).ToList();
 
             var allowLocal = true;
@@ -370,10 +372,10 @@ namespace EventHorizon.Identity.AuthServer.Identity
             return new LoginViewModel
             {
                 AllowRememberLogin = AccountOptions.AllowRememberLogin,
-                    EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
-                    ReturnUrl = returnUrl,
-                    Username = context?.LoginHint,
-                    ExternalProviders = providers.ToArray()
+                EnableLocalLogin = allowLocal && AccountOptions.AllowLocalLogin,
+                ReturnUrl = returnUrl,
+                Username = context?.LoginHint,
+                ExternalProviders = providers.ToArray()
             };
         }
 

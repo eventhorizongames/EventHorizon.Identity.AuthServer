@@ -25,6 +25,22 @@
                 "/initdb"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "options": {
+                "env": {
+                    "ASPNETCORE_ENVIRONMENT": "Development",
+                    "ASPNETCORE_URLS": "http://authserver.com:5000"
+                }
+            },
+            "label": "watch",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "watch",
+                "run"
+            ],
+            "problemMatcher": "$msCompile"
         }
     ]
 }
