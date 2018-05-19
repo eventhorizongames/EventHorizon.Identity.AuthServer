@@ -12,5 +12,6 @@ services:
       - "23500:80"
     volumes:
       - ~/Configs/Identity/appsettings.Production.json:/app/appsettings.Production.json
+      - ~/Configs/Identity/admins.Production.json:/app/admins.Production.json
       - ~/EventHorizon.Keys/AuthServer/certificate.pfx:/app/certificate.pfx
     network_mode: "bridge"
