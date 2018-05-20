@@ -104,7 +104,7 @@ namespace EventHorizon.Identity.AuthServer
             });
 
             services.AddScoped<IEmailSender, EmailSender>();
-            
+
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -113,6 +113,7 @@ namespace EventHorizon.Identity.AuthServer
 
         public void Configure(IApplicationBuilder app)
         {
+            app.UseForwardedHeaders();
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -123,8 +124,6 @@ namespace EventHorizon.Identity.AuthServer
                 app.UseExceptionHandler("/Home/Error");
             }
             AuthDatabase.InitializeDatabase(app.ApplicationServices);
-
-            app.UseForwardedHeaders();
 
             app.UseIdentityServer();
 
