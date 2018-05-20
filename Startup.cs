@@ -83,6 +83,10 @@ namespace EventHorizon.Identity.AuthServer
 
             if (Environment.IsDevelopment())
             {
+                services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.All;
+                });
                 identityServer.AddDeveloperSigningCredential();
             }
             else
@@ -104,20 +108,10 @@ namespace EventHorizon.Identity.AuthServer
             });
 
             services.AddScoped<IEmailSender, EmailSender>();
-
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.All;
-            });
         }
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseForwardedHeaders();app.Use((context, next) =>
-{
-    context.Request.Scheme = "https";
-    return next();
-});
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -125,6 +119,12 @@ namespace EventHorizon.Identity.AuthServer
             }
             else
             {
+                app.UseForwardedHeaders();
+                app.Use((context, next) =>
+                {
+                    context.Request.Scheme = "https";
+                    return next();
+                });
                 app.UseExceptionHandler("/Home/Error");
             }
             AuthDatabase.InitializeDatabase(app.ApplicationServices);
