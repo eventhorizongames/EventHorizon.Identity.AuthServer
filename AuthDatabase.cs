@@ -24,7 +24,7 @@ namespace EventHorizon.Identity.AuthServer
     {
         public static void InitializeDatabase(IServiceProvider services)
         {
-            using (var serviceScope = services.GetService<IServiceScopeFactory>().CreateScope())
+            using(var serviceScope = services.GetService<IServiceScopeFactory>().CreateScope())
             {
                 MigrateApplication(serviceScope);
                 serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
@@ -41,10 +41,10 @@ namespace EventHorizon.Identity.AuthServer
 
             var config = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-              .AddJsonFile("admins.json")
-              .AddJsonFile($"admins.{env.EnvironmentName}.json", true)
-              .AddEnvironmentVariables()
-              .Build();
+                .AddJsonFile("admins.json")
+                .AddJsonFile($"admins.{env.EnvironmentName}.json", true)
+                .AddEnvironmentVariables()
+                .Build();
 
             // Create Admin Roles
             mediator.Send(new RoleCreateEvent
@@ -54,17 +54,17 @@ namespace EventHorizon.Identity.AuthServer
             mediator.Send(new RoleAddClaimEvent
             {
                 RoleName = UserRoles.ADMIN,
-                Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.create"),
+                    Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.create"),
             }).GetAwaiter().GetResult();
             mediator.Send(new RoleAddClaimEvent
             {
                 RoleName = UserRoles.ADMIN,
-                Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.update"),
+                    Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.update"),
             }).GetAwaiter().GetResult();
             mediator.Send(new RoleAddClaimEvent
             {
                 RoleName = UserRoles.ADMIN,
-                Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.view"),
+                    Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.view"),
             }).GetAwaiter().GetResult();
 
             // Create Admins
@@ -78,15 +78,15 @@ namespace EventHorizon.Identity.AuthServer
                     var result = mediator.Send(new UserCreateEvent
                     {
                         User = new Models.ApplicationUser
-                        {
-                            UserName = admin.Email,
-                            Email = admin.Email,
-                        },
-                        Profile = new Models.ApplicationUserProfile
-                        {
+                            {
+                                UserName = admin.Email,
+                                    Email = admin.Email,
+                            },
+                            Profile = new Models.ApplicationUserProfile
+                            {
 
-                        },
-                        Password = admin.Password,
+                            },
+                            Password = admin.Password,
                     }).GetAwaiter().GetResult();
                     if (result.Succeeded)
                     {
@@ -100,7 +100,7 @@ namespace EventHorizon.Identity.AuthServer
                 mediator.Publish(new UserAddToRoleEvent
                 {
                     User = adminUser,
-                    Role = UserRoles.ADMIN
+                        Role = UserRoles.ADMIN
                 }).GetAwaiter().GetResult();
             }
 
@@ -182,9 +182,9 @@ namespace EventHorizon.Identity.AuthServer
                 AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
                 ClientSecrets = { new Secret("49C1A7E1-0C79-4A89-A3D6-A37998FB86B0".Sha256()) },
 
-                RedirectUris = { "http://regauthserver.com:5001/signin-oidc" },
-                FrontChannelLogoutUri = "http://regauthserver.com:5001/signout-oidc",
-                PostLogoutRedirectUris = { "http://regauthserver.com:5001/signout-callback-oidc" },
+                RedirectUris = { "http://gameserver.com:5000/signin-oidc" },
+                FrontChannelLogoutUri = "http://gameserver.com:5000/signout-oidc",
+                PostLogoutRedirectUris = { "http://gamerserver.com:5000/signout-callback-oidc" },
 
                 AllowOfflineAccess = true,
                 AllowedScopes = { "openid", "profile", "api1" }
@@ -229,7 +229,7 @@ namespace EventHorizon.Identity.AuthServer
 
                 AllowedScopes = { "openid", "profile", "api1" }
             };
-            return new[]
+            return new []
             {
                 credentialsClient,
 

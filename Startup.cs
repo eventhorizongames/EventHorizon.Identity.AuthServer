@@ -39,6 +39,10 @@ namespace EventHorizon.Identity.AuthServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedProto;
+            });
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
             services.AddMvc();
 
