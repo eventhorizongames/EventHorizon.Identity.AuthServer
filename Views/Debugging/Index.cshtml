@@ -1,0 +1,5 @@
+
+@foreach (var header in Context.Request.Headers)
+{
+    <div><span>@header.Key: </span>@header.Value</div>
+}
