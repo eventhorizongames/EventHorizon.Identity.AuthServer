@@ -40,10 +40,6 @@ namespace EventHorizon.Identity.AuthServer
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<ForwardedHeadersOptions>(options =>
-            {
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-            });
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
             services.AddMvc();
 
@@ -108,6 +104,11 @@ namespace EventHorizon.Identity.AuthServer
             });
 
             services.AddScoped<IEmailSender, EmailSender>();
+            
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+            });
         }
 
         public void Configure(IApplicationBuilder app)
