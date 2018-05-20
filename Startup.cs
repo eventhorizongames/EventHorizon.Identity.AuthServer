@@ -113,7 +113,11 @@ namespace EventHorizon.Identity.AuthServer
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseForwardedHeaders();
+            app.UseForwardedHeaders();app.Use((context, next) =>
+{
+    context.Request.Scheme = "https";
+    return next();
+});
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
