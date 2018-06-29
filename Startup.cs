@@ -47,7 +47,16 @@ namespace EventHorizon.Identity.AuthServer
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
+            {
+                if (Environment.IsDevelopment())
+                {
+                    options.UseInMemoryDatabase("development_db");
+                }
+                else
+                {
+                    options.UseSqlServer(connectionString);
+                }
+            });
 
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
@@ -60,21 +69,35 @@ namespace EventHorizon.Identity.AuthServer
                     options.Events.RaiseFailureEvents = true;
                     options.Events.RaiseSuccessEvents = true;
                 })
-                // .AddTestUsers(TestUsers.Users)
                 // this adds the config data from DB (clients, resources, CORS)
                 .AddConfigurationStore<HistoryExtendedConfigurationDbContext>(options =>
                 {
-                    options.ConfigureDbContext = builder =>
-                        builder.UseSqlServer(connectionString,
-                            sql => sql.MigrationsAssembly(migrationsAssembly));
+                    if (Environment.IsDevelopment())
+                    {
+                        options.ConfigureDbContext = builder =>
+                            builder.UseInMemoryDatabase("development_db");
+                    }
+                    else
+                    {
+                        options.ConfigureDbContext = builder =>
+                            builder.UseSqlServer(connectionString,
+                                sql => sql.MigrationsAssembly(migrationsAssembly));
+                    }
                 })
                 // this adds the operational data from DB (codes, tokens, consents)
                 .AddOperationalStore(options =>
                 {
-                    options.ConfigureDbContext = builder =>
-                        builder.UseSqlServer(connectionString,
-                            sql => sql.MigrationsAssembly(migrationsAssembly));
-
+                    if (Environment.IsDevelopment())
+                    {
+                        options.ConfigureDbContext = builder =>
+                            builder.UseInMemoryDatabase("development_db");
+                    }
+                    else
+                    {
+                        options.ConfigureDbContext = builder =>
+                            builder.UseSqlServer(connectionString,
+                                sql => sql.MigrationsAssembly(migrationsAssembly));
+                    }
                     // this enables automatic token cleanup. this is optional.
                     options.EnableTokenCleanup = true;
                     // options.TokenCleanupInterval = 15; // interval in seconds. 15 seconds useful for debugging

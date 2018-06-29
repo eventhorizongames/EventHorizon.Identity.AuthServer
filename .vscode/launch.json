@@ -3,8 +3,7 @@
     // Use hover for the description of the existing attributes
     // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
     "version": "0.2.0",
-    "configurations": [
-        {
+    "configurations": [{
             "name": ".NET Core Launch (web)",
             "type": "coreclr",
             "request": "launch",
@@ -17,10 +16,9 @@
             "internalConsoleOptions": "openOnSessionStart",
             "launchBrowser": {
                 "enabled": true,
-                "args": "http://authserver.com:5555",
                 "windows": {
                     "command": "cmd.exe",
-                    "args": "/C start http://authserver.com:5555"
+                    "args": "/C start http://localhost:5555"
                 },
                 "osx": {
                     "command": "open"
@@ -31,7 +29,7 @@
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "ASPNETCORE_URLS": "http://authserver.com:5555"
+                "ASPNETCORE_URLS": "http://localhost:5555",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
@@ -50,10 +48,9 @@
             "internalConsoleOptions": "openOnSessionStart",
             "launchBrowser": {
                 "enabled": true,
-                "args": "http://authserver.com:5000",
                 "windows": {
                     "command": "cmd.exe",
-                    "args": "/C start http://authserver.com:5000"
+                    "args": "/C start"
                 },
                 "osx": {
                     "command": "open"
@@ -64,7 +61,7 @@
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Production",
-                "ASPNETCORE_URLS": "http://authserver.com:5000"
+                "ASPNETCORE_URLS": "http://localhost:5000",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

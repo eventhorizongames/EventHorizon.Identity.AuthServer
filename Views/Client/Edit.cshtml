@@ -145,4 +145,26 @@
             </form>
         </div>
     </div>
+    <hr />
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Allowed CORS Origins</h3>
+            @foreach (var uri in Model.Entity.AllowedCorsOrigins)
+            {
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@uri.Id" asp-action="RemoveCorsOrigin">
+                <div>@uri.Origin <button class="btn btn-link" type="submit">Remove</button></div>
+            </form>
+            }
+            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-action="AddCorsOrigin">
+                <div class="form-group">
+                    <label for="CorsOrigin">Cors Origin</label>
+                    <input name="CorsOrigin" class="form-control" placeholder="Cors Origin" />                    
+                </div>
+                <button class="btn btn-default" type="submit">Add</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+        </div>
+    </div>
+    <div style="height: 250px"></div>
 </div>

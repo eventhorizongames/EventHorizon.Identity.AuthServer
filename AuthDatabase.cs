@@ -24,21 +24,39 @@ namespace EventHorizon.Identity.AuthServer
     {
         public static void InitializeDatabase(IServiceProvider services)
         {
-            using(var serviceScope = services.GetService<IServiceScopeFactory>().CreateScope())
+            using (var serviceScope = services.GetService<IServiceScopeFactory>().CreateScope())
             {
-                MigrateApplication(serviceScope);
-                serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>().Database.Migrate();
-                MigrateConfiguration(serviceScope);
+                serviceScope.MigrateContexts();
+                serviceScope.CreateAdmins();
+                serviceScope.CreateConfiguration();
             }
         }
 
-        private static void MigrateApplication(IServiceScope serviceScope)
+        private static void MigrateContexts(this IServiceScope serviceScope)
         {
             var env = serviceScope.ServiceProvider.GetRequiredService<IHostingEnvironment>();
-            var auth = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-            var mediator = serviceScope.ServiceProvider.GetRequiredService<IMediator>();
-            auth.Database.Migrate();
+            if (env.IsDevelopment())
+            {
+                return;
+            }
+            serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>()
+                .Database
+                .Migrate();
 
+            serviceScope.ServiceProvider.GetRequiredService<PersistedGrantDbContext>()
+                .Database
+                .Migrate();
+
+            serviceScope.ServiceProvider.GetRequiredService<HistoryExtendedConfigurationDbContext>()
+                .Database
+                .Migrate();
+
+        }
+        private static void CreateAdmins(this IServiceScope serviceScope)
+        {
+            var appContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var env = serviceScope.ServiceProvider.GetRequiredService<IHostingEnvironment>();
+            var mediator = serviceScope.ServiceProvider.GetRequiredService<IMediator>();
             var config = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("admins.json")
@@ -54,17 +72,17 @@ namespace EventHorizon.Identity.AuthServer
             mediator.Send(new RoleAddClaimEvent
             {
                 RoleName = UserRoles.ADMIN,
-                    Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.create"),
+                Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.create"),
             }).GetAwaiter().GetResult();
             mediator.Send(new RoleAddClaimEvent
             {
                 RoleName = UserRoles.ADMIN,
-                    Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.update"),
+                Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.update"),
             }).GetAwaiter().GetResult();
             mediator.Send(new RoleAddClaimEvent
             {
                 RoleName = UserRoles.ADMIN,
-                    Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.view"),
+                Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.view"),
             }).GetAwaiter().GetResult();
 
             // Create Admins
@@ -72,25 +90,25 @@ namespace EventHorizon.Identity.AuthServer
             config.Bind(admins);
             foreach (var admin in admins.Admins)
             {
-                var adminUser = auth.Users.FirstOrDefault(a => a.Email == admin.Email);
+                var adminUser = appContext.Users.FirstOrDefault(a => a.Email == admin.Email);
                 if (adminUser == null)
                 {
                     var result = mediator.Send(new UserCreateEvent
                     {
                         User = new Models.ApplicationUser
-                            {
-                                UserName = admin.Email,
-                                    Email = admin.Email,
-                            },
-                            Profile = new Models.ApplicationUserProfile
-                            {
+                        {
+                            UserName = admin.Email,
+                            Email = admin.Email,
+                        },
+                        Profile = new Models.ApplicationUserProfile
+                        {
 
-                            },
-                            Password = admin.Password,
+                        },
+                        Password = admin.Password,
                     }).GetAwaiter().GetResult();
                     if (result.Succeeded)
                     {
-                        adminUser = auth.Users.FirstOrDefault(a => a.Email == admin.Email);
+                        adminUser = appContext.Users.FirstOrDefault(a => a.Email == admin.Email);
                     }
                     else
                     {
@@ -100,7 +118,7 @@ namespace EventHorizon.Identity.AuthServer
                 mediator.Publish(new UserAddToRoleEvent
                 {
                     User = adminUser,
-                        Role = UserRoles.ADMIN
+                    Role = UserRoles.ADMIN
                 }).GetAwaiter().GetResult();
             }
 
@@ -116,10 +134,9 @@ namespace EventHorizon.Identity.AuthServer
             public string Password { get; set; }
         }
 
-        private static void MigrateConfiguration(IServiceScope serviceScope)
+        private static void CreateConfiguration(this IServiceScope serviceScope)
         {
             var context = serviceScope.ServiceProvider.GetRequiredService<HistoryExtendedConfigurationDbContext>();
-            context.Database.Migrate();
             if (!context.Clients.Any())
             {
                 foreach (var client in GetClients())
@@ -149,7 +166,10 @@ namespace EventHorizon.Identity.AuthServer
         }
         private static IEnumerable<IdentityResource> GetIdentityResources()
         {
-            return new IdentityResource[] { new IdentityResources.OpenId(), new IdentityResources.Profile(), };
+            return new IdentityResource[] {
+                new IdentityResources.OpenId(),
+                new IdentityResources.Profile(),
+            };
         }
 
         private static IEnumerable<ApiResource> GetApiResources()
@@ -218,10 +238,10 @@ namespace EventHorizon.Identity.AuthServer
                 AllowAccessTokensViaBrowser = true,
 
                 RedirectUris = {
-                "http://localhost:5002/index.html",
-                "http://localhost:5002/callback.html",
-                "http://localhost:5002/silent.html",
-                "http://localhost:5002/popup.html",
+                    "http://localhost:5002/index.html",
+                    "http://localhost:5002/callback.html",
+                    "http://localhost:5002/silent.html",
+                    "http://localhost:5002/popup.html",
                 },
 
                 PostLogoutRedirectUris = { "http://localhost:5002/index.html" },
@@ -229,7 +249,7 @@ namespace EventHorizon.Identity.AuthServer
 
                 AllowedScopes = { "openid", "profile", "api1" }
             };
-            return new []
+            return new[]
             {
                 credentialsClient,
 
