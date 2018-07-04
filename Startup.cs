@@ -129,6 +129,17 @@ namespace EventHorizon.Identity.AuthServer
                 options.AddPolicy("Identity Admin",
                     policy => policy.RequireClaim(IdentityClaimTypes.PERMISSION, "identity.view", "identity.create", "identity.update"));
             });
+            services.AddCors(options =>
+            {
+                // this defines a CORS policy called "default"
+                options.AddPolicy("default", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
+
 
             services.AddScoped<IEmailSender, EmailSender>();
         }
@@ -152,6 +163,7 @@ namespace EventHorizon.Identity.AuthServer
             }
             AuthDatabase.InitializeDatabase(app.ApplicationServices);
 
+            app.UseCors("default");
             app.UseIdentityServer();
 
             app.UseStaticFiles();
