@@ -45,7 +45,7 @@ namespace EventHorizon.Identity.AuthServer.Clients
         }
 
         [HttpGet("{id}")]
-        public IActionResult Edit(string id)
+        public async Task<IActionResult> Edit(string id)
         {
             var entity = _configurationDbContext.Clients
                 .Include("AllowedScopes")
@@ -59,6 +59,7 @@ namespace EventHorizon.Identity.AuthServer.Clients
             return View(new ClientModel
             {
                 Entity = entity,
+                ApiResourceList = await _configurationDbContext.ApiResources.ToListAsync(),
                 ClientId = id,
 
                 AllowOfflineAccess = entity.AllowOfflineAccess,

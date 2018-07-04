@@ -1,0 +1,24 @@
+@model ResourceCreateModel
+@using EventHorizon.Identity.AuthServer.Resource.Models
+
+<div class="container">
+    <h3>Create Api Resource</h3>
+    <div class="row">
+        <div class="col-md-12">
+            <form method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input type="hidden" asp-for="ReturnClient" />
+                <div class="form-group">
+                    <label asp-for="Name"></label>
+                    <input asp-for="Name" class="form-control" placeholder="@Model.Name" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="DisplayName"></label>
+                    <input asp-for="DisplayName" class="form-control" placeholder="@Model.DisplayName" />
+                </div>
+                <button type="submit" class="btn btn-default">Create</button>
+            </form>
+        </div>
+    </div>
+    <div style="height: 250px"></div>
+</div>

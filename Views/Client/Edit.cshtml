@@ -89,14 +89,7 @@
             }
             <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-action="AddScope">
                 <div class="form-group">
-                    <label for="Scope">New Scope</label>
-                    <input name="Scope" class="form-control" placeholder="New Scope" />                    
-                </div>
-                <button class="btn btn-default" type="submit">Add</button>
-            </form>
-            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-action="AddScope">
-                <div class="form-group">
-                    <label for="Scope">New Scope Select</label>
+                    <label for="Scope">Add New Scope</label>
                     <select name="Scope" class="form-control">
                         <option value="@IdentityServerConstants.StandardScopes.OpenId">Open Id (@IdentityServerConstants.StandardScopes.OpenId)</option>
                         <option value="@IdentityServerConstants.StandardScopes.Profile">Profile (@IdentityServerConstants.StandardScopes.Profile)</option>
@@ -104,9 +97,15 @@
                         <option value="@IdentityServerConstants.StandardScopes.Address">Address (@IdentityServerConstants.StandardScopes.Address)</option>
                         <option value="@IdentityServerConstants.StandardScopes.Phone">Phone (@IdentityServerConstants.StandardScopes.Phone)</option>
                         <option value="@IdentityServerConstants.StandardScopes.OfflineAccess">Offline Access (@IdentityServerConstants.StandardScopes.OfflineAccess)</option>
+                    
+                    @foreach (var apiResource in Model.ApiResourceList)
+                    {
+                        <option value="@apiResource.Name">@apiResource.DisplayName (@apiResource.Name)</option>
+                    }
                     </select>
                 </div>
                 <button class="btn btn-default" type="submit">Add</button>
+                <a class="btn btn-default" type="button" asp-controller="Resource" asp-action="Create" asp-route-returnclient="@Model.Entity.ClientId">Create New Scope</a>
             </form>
         </div>
     </div>

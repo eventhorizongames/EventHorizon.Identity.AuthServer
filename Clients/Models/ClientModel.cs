@@ -7,6 +7,7 @@ namespace EventHorizon.Identity.AuthServer.Clients.Models
     public class ClientModel
     {
         public Client Entity { get; set; }
+        public List<ApiResource> ApiResourceList { get; set; }
 
         public string ClientId { get; set; }
         [Display(Name = "Client Name")]
