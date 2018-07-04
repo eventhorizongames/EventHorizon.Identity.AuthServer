@@ -1,16 +1,18 @@
-FROM microsoft/aspnetcore-build:2.0 AS build-env
-WORKDIR /app
+# Sample contents of Dockerfile
+# Stage 1
+FROM microsoft/dotnet:2.1-sdk AS build
+WORKDIR /source
 
-# copy csproj and restore as distinct layers
-COPY *.csproj ./
+# caches restore result by copying csproj file separately
+COPY *.csproj .
 RUN dotnet restore
 
-# copy everything else and build
-COPY . ./
-RUN dotnet publish -c Release -o out
+# copies the rest of your code
+COPY . .
+RUN dotnet publish --output /app/ --configuration Release
 
-# build runtime image
-FROM microsoft/aspnetcore:2.0
+# Stage 2
+FROM microsoft/dotnet:2.1-aspnetcore-runtime AS runtime
 WORKDIR /app
-COPY --from=build-env /app/out .
+COPY --from=build /app .
 ENTRYPOINT ["dotnet", "EventHorizon.Identity.AuthServer.dll"]
