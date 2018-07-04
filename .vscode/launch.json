@@ -9,7 +9,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.0/EventHorizon.Identity.AuthServer.dll",
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.1/EventHorizon.Identity.AuthServer.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
@@ -41,7 +41,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.0/EventHorizon.Identity.AuthServer.dll",
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.1/EventHorizon.Identity.AuthServer.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
