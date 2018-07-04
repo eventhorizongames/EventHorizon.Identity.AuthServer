@@ -29,7 +29,7 @@ namespace EventHorizon.Identity.AuthServer.Resource
         }
 
         [HttpGet("Create")]
-        public async Task<IActionResult> Create([FromQuery]string returnClient)
+        public IActionResult Create([FromQuery]string returnClient)
         {
             return View(new ResourceCreateModel()
             {
