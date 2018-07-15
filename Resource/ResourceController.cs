@@ -28,21 +28,21 @@ namespace EventHorizon.Identity.AuthServer.Resource
             return View(_configurationDbContext.ApiResources.ToList());
         }
 
-        [HttpGet("Edit/{name}")]
-        public IActionResult Edit(string name)
+        [HttpGet("{id}")]
+        public IActionResult Edit(string id)
         {
             var entity = _configurationDbContext.ApiResources
                 .Include("Scopes")
                 .Include("UserClaims")
-                .FirstOrDefault(a => a.Name == name);
+                .FirstOrDefault(a => a.Name == id);
             return View(new ResourceModel
             {
                 Entity = entity,
-                Name = name,
+                Name = id,
             });
         }
 
-        [HttpPost("Edit/{name}")]
+        [HttpPost("{id}")]
         public IActionResult Edit(ResourceModel model)
         {
             var entity = _configurationDbContext.ApiResources.FirstOrDefault(a => a.Name == model.Name);
@@ -53,7 +53,7 @@ namespace EventHorizon.Identity.AuthServer.Resource
             _configurationDbContext.ApiResources.Update(entity);
             _configurationDbContext.SaveChanges();
 
-            return RedirectToAction(nameof(Edit), "Resource", new { name = model.Name });
+            return RedirectToAction(nameof(Edit), "Resource", new { id = model.Name });
         }
 
         [HttpGet("Create")]
@@ -81,11 +81,11 @@ namespace EventHorizon.Identity.AuthServer.Resource
             return RedirectToAction(nameof(Index), "Resource");
         }
 
-        [HttpDelete("{name}")]
-        public IActionResult Delete(string name)
+        [HttpPost("{id}/Delete")]
+        public IActionResult Delete(string id)
         {
             _configurationDbContext.ApiResources.Remove(
-                _configurationDbContext.ApiResources.FirstOrDefault(a => a.Name == name)
+                _configurationDbContext.ApiResources.FirstOrDefault(a => a.Name == id)
             );
             _configurationDbContext.SaveChanges();
 

@@ -25,11 +25,11 @@
             <h3>Scopes</h3>
             @foreach (var scope in Model.Entity.Scopes)
             {
-            <form method="POST" asp-route-name="@Model.Entity.Name" asp-route-id="@scope.Id" asp-action="RemoveScope">
+            <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-route-id="@scope.Id" asp-action="RemoveScope">
                 <div>@scope.DisplayName (@scope.Name) <button class="btn btn-link" type="submit">Remove</button></div>
             </form>
             }
-            <form method="POST" asp-route-clientId="@Model.Entity.Name" asp-action="AddScope">
+            <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-action="AddScope">
                 <div class="form-group">
                     <label for="Name">Name</label>
                     <input name="Name" class="form-control" placeholder="Name" />
@@ -47,11 +47,11 @@
             <h3>User Claims</h3>
             @foreach (var userClaim in Model.Entity.UserClaims)
             {
-            <form method="POST" asp-route-name="@Model.Entity.Name" asp-route-id="@userClaim.Id" asp-action="RemoveUserClaim">
+            <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-route-id="@userClaim.Id" asp-action="RemoveUserClaim">
                 <div>@userClaim.Type <button class="btn btn-link" type="submit">Remove</button></div>
             </form>
             }
-            <form method="POST" asp-route-clientId="@Model.Entity.Name" asp-action="AddUserClaim">
+            <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-action="AddUserClaim">
                 <div class="form-group">
                     <label for="Type">Type</label>
                     <input name="Type" class="form-control" placeholder="Type" />

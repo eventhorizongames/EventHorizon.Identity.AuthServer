@@ -15,12 +15,12 @@ namespace EventHorizon.Identity.AuthServer.Resource
 {
     public partial class ResourceController : Controller
     {
-        [HttpPost("{name}/removeUserClaim/{id:int}")]
-        public async Task<IActionResult> RemoveUserClaim(string name, int id)
+        [HttpPost("{resourceId}/removeUserClaim/{id:int}")]
+        public async Task<IActionResult> RemoveUserClaim(string resourceId, int id)
         {
             var apiResource = _configurationDbContext.ApiResources
                 .Include("UserClaims")
-                .FirstOrDefault(a => a.Name == name);
+                .FirstOrDefault(a => a.Name == resourceId);
             var userClaim = apiResource.UserClaims.FirstOrDefault(a => a.Id == id);
             if (userClaim != null)
             {
@@ -29,15 +29,15 @@ namespace EventHorizon.Identity.AuthServer.Resource
                 await _configurationDbContext.SaveChangesAsync();
             }
 
-            return RedirectToAction(nameof(Edit), "Resource", new { name });
+            return RedirectToAction(nameof(Edit), "Resource", new { id = resourceId });
         }
 
-        [HttpPost("{name}/addUserClaim")]
-        public async Task<IActionResult> AddUserClaim([FromRoute] string name, [FromForm] string type)
+        [HttpPost("{resourceId}/addUserClaim")]
+        public async Task<IActionResult> AddUserClaim([FromRoute] string resourceId, [FromForm] string type)
         {
             var apiResource = _configurationDbContext.ApiResources
                 .Include("UserClaims")
-                .FirstOrDefault(a => a.Name == name);
+                .FirstOrDefault(a => a.Name == resourceId);
             if (apiResource.UserClaims.FirstOrDefault(a => a.Type == type) == null)
             {
                 apiResource.UserClaims.Add(new ApiResourceClaim
@@ -47,7 +47,7 @@ namespace EventHorizon.Identity.AuthServer.Resource
                 _configurationDbContext.Update(apiResource);
                 await _configurationDbContext.SaveChangesAsync();
             }
-            return RedirectToAction(nameof(Edit), "Resource", new { id = name });
+            return RedirectToAction(nameof(Edit), "Resource", new { id = resourceId });
         }
     }
 }
