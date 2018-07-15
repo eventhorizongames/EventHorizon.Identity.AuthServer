@@ -80,5 +80,16 @@ namespace EventHorizon.Identity.AuthServer.Resource
             }
             return RedirectToAction(nameof(Index), "Resource");
         }
+
+        [HttpDelete("{name}")]
+        public IActionResult Delete(string name)
+        {
+            _configurationDbContext.ApiResources.Remove(
+                _configurationDbContext.ApiResources.FirstOrDefault(a => a.Name == name)
+            );
+            _configurationDbContext.SaveChanges();
+
+            return RedirectToAction(nameof(Index), "Resource");
+        }
     }
 }
