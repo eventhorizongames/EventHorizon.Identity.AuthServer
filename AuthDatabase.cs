@@ -176,7 +176,8 @@ namespace EventHorizon.Identity.AuthServer
         {
             return new ApiResource[]
             {
-                new ApiResource("api1", "My API #1")
+                new ApiResource("api1", "My API #1"),
+                new ApiResource("roles", "Role", new[] {"role"})
             };
         }
 
@@ -202,12 +203,12 @@ namespace EventHorizon.Identity.AuthServer
                 AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
                 ClientSecrets = { new Secret("49C1A7E1-0C79-4A89-A3D6-A37998FB86B0".Sha256()) },
 
-                RedirectUris = { "http://gameserver.com:5000/signin-oidc" },
-                FrontChannelLogoutUri = "http://gameserver.com:5000/signout-oidc",
-                PostLogoutRedirectUris = { "http://gamerserver.com:5000/signout-callback-oidc" },
+                RedirectUris = { "http://localhost:5555/signin-oidc" },
+                FrontChannelLogoutUri = "http://localhost:5555/signout-oidc",
+                PostLogoutRedirectUris = { "http://localhost:5555/signout-callback-oidc" },
 
                 AllowOfflineAccess = true,
-                AllowedScopes = { "openid", "profile", "api1" }
+                AllowedScopes = { "openid", "profile", "api1", "roles" }
             };
             // MVC client using hybrid flow
             var implClient = new Client
@@ -218,8 +219,8 @@ namespace EventHorizon.Identity.AuthServer
                 AllowedGrantTypes = GrantTypes.Implicit,
                 AllowAccessTokensViaBrowser = true,
 
-                RedirectUris = { "http://regauthserver.com:5001/signin-oidc" },
-                PostLogoutRedirectUris = { "http://regauthserver.com:5001/signout-callback-oidc" },
+                RedirectUris = { "http://localhost.com:5001/signin-oidc" },
+                PostLogoutRedirectUris = { "http://localhost.com:5001/signout-callback-oidc" },
 
                 AllowOfflineAccess = true,
                 AllowedScopes = {

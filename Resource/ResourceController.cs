@@ -28,6 +28,34 @@ namespace EventHorizon.Identity.AuthServer.Resource
             return View(_configurationDbContext.ApiResources.ToList());
         }
 
+        [HttpGet("Edit/{name}")]
+        public IActionResult Edit(string name)
+        {
+            var entity = _configurationDbContext.ApiResources
+                .Include("Scopes")
+                .Include("UserClaims")
+                .FirstOrDefault(a => a.Name == name);
+            return View(new ResourceModel
+            {
+                Entity = entity,
+                Name = name,
+            });
+        }
+
+        [HttpPost("Edit/{name}")]
+        public IActionResult Edit(ResourceModel model)
+        {
+            var entity = _configurationDbContext.ApiResources.FirstOrDefault(a => a.Name == model.Name);
+
+            entity.DisplayName = model.DisplayName ?? entity.DisplayName;
+            entity.Description = model.Description ?? entity.Description;
+
+            _configurationDbContext.ApiResources.Update(entity);
+            _configurationDbContext.SaveChanges();
+
+            return RedirectToAction(nameof(Edit), "Resource", new { name = model.Name });
+        }
+
         [HttpGet("Create")]
         public IActionResult Create([FromQuery]string returnClient)
         {

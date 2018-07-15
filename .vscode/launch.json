@@ -18,7 +18,7 @@
                 "enabled": true,
                 "windows": {
                     "command": "cmd.exe",
-                    "args": "/C start http://localhost:5555"
+                    "args": "/C start http://localhost:5566"
                 },
                 "osx": {
                     "command": "open"
@@ -29,7 +29,7 @@
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "ASPNETCORE_URLS": "http://localhost:5555",
+                "ASPNETCORE_URLS": "http://localhost:5566",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"

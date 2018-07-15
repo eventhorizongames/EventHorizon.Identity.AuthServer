@@ -29,7 +29,7 @@
             "options": {
                 "env": {
                     "ASPNETCORE_ENVIRONMENT": "Development",
-                    "ASPNETCORE_URLS": "http://authserver.com:5555"
+                    "ASPNETCORE_URLS": "http://authserver.com:5566"
                 }
             },
             "label": "watch",
