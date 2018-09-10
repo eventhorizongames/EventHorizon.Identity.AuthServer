@@ -125,15 +125,8 @@ namespace EventHorizon.Identity.AuthServer.Controllers
                 }
             });
 
-            // var claimList = await _userManager.GetClaimsAsync(user);
-            // await ReplaceClaim(claimList, user, JwtClaimTypes.Name, model.Profile?.FirstName + " " + model.Profile?.LastName);
-            // await ReplaceClaim(claimList, user, JwtClaimTypes.GivenName, model.Profile.FirstName);
-            // await ReplaceClaim(claimList, user, JwtClaimTypes.FamilyName, model.Profile.LastName);
-            // await ReplaceClaim(claimList, user, JwtClaimTypes.Email, model.Email);
-            // new Claim(JwtClaimTypes.EmailVerified, "true", ClaimValueTypes.Boolean),
-            // new Claim(JwtClaimTypes.WebSite, "http://alice.com"),
-            // new Claim(JwtClaimTypes.Address, @"{ 'street_address': 'One Hacker Way', 'locality': 'Heidelberg', 'postal_code': 69118, 'country': 'Germany' }", IdentityServer4.IdentityServerConstants.ClaimValueTypes.Json)
-
+            await _signInManager.RefreshSignInAsync(user);
+            
             StatusMessage = "Your profile has been updated";
             return RedirectToAction(nameof(Index));
         }
