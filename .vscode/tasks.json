@@ -13,21 +13,6 @@
         {
             "options": {
                 "env": {
-                    "ASPNETCORE_ENVIRONMENT": "Development"
-                }
-            },
-            "label": "initDB",
-            "command": "dotnet",
-            "type": "process",
-            "args": [
-                "run",
-                "/initdb"
-            ],
-            "problemMatcher": "$msCompile"
-        },
-        {
-            "options": {
-                "env": {
                     "ASPNETCORE_ENVIRONMENT": "Development",
                     "ASPNETCORE_URLS": "http://authserver.com:5566"
                 }
