@@ -126,7 +126,7 @@ namespace EventHorizon.Identity.AuthServer.Identity
 
                 if (user != null)
                 {
-                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, false);
+                    var result = await _signInManager.PasswordSignInAsync(user, model.Password, false, true);
                     if (!result.Succeeded)
                     {
                         if (result.RequiresTwoFactor)
