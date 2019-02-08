@@ -6,20 +6,25 @@ using IdentityServer4;
 using IdentityServer4.EntityFramework.Mappers;
 using IdentityServer4.Models;
 using MediatR;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.Clients
 {
     public struct InitializeClientsHandler : IRequestHandler<InitializeClientsCommand, bool>
     {
+        readonly IHostingEnvironment _hostingEnvironment;
         readonly HistoryExtendedConfigurationDbContext _context;
 
         public InitializeClientsHandler(
+            IHostingEnvironment hostingEnvironment,
             HistoryExtendedConfigurationDbContext context
         )
         {
+            _hostingEnvironment = hostingEnvironment;
             _context = context;
         }
-        
+
         public Task<bool> Handle(InitializeClientsCommand request, CancellationToken cancellationToken)
         {
             if (!_context.Clients.Any())
@@ -35,85 +40,21 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.Clients
             );
         }
 
-        private static IEnumerable<Client> GetClients()
+        private IEnumerable<Client> GetClients()
         {
-            // client credentials flow client
-            var credentialsClient = new Client
-            {
-                ClientId = "client",
-                ClientName = "Client Credentials Client",
+            // Load configuration from a file
+            var clientsConfig = new ConfigurationBuilder()
+                .SetBasePath(_hostingEnvironment.ContentRootPath)
+                .AddJsonFile("clients.json")
+                .AddJsonFile($"clients.{_hostingEnvironment.EnvironmentName}.json", true)
+                .AddEnvironmentVariables()
+                .Build();
 
-                AllowedGrantTypes = GrantTypes.ClientCredentials,
-                ClientSecrets = { new Secret("511536EF-F270-4058-80CA-1C89C192F69A".Sha256()) },
+            // Bind Admin Instance from Config
+            var clientConfigFile = new ClientConfigurationFile();
+            clientsConfig.Bind(clientConfigFile);
 
-                AllowedScopes = { "api1" }
-            };
-            // MVC client using hybrid flow
-            var hybridClient = new Client
-            {
-                ClientId = "mvc",
-                ClientName = "MVC Client",
-
-                AllowedGrantTypes = GrantTypes.HybridAndClientCredentials,
-                ClientSecrets = { new Secret("49C1A7E1-0C79-4A89-A3D6-A37998FB86B0".Sha256()) },
-
-                RedirectUris = { "http://localhost:5555/signin-oidc" },
-                FrontChannelLogoutUri = "http://localhost:5555/signout-oidc",
-                PostLogoutRedirectUris = { "http://localhost:5555/signout-callback-oidc" },
-
-                AllowOfflineAccess = true,
-                AllowedScopes = { "openid", "profile", "api1", "roles" }
-            };
-            // MVC client using hybrid flow
-            var implClient = new Client
-            {
-                ClientId = "mvc_impl",
-                ClientName = "MVC Implicit Client",
-
-                AllowedGrantTypes = GrantTypes.Implicit,
-                AllowAccessTokensViaBrowser = true,
-
-                RedirectUris = { "http://localhost.com:5001/signin-oidc" },
-                PostLogoutRedirectUris = { "http://localhost.com:5001/signout-callback-oidc" },
-
-                AllowOfflineAccess = true,
-                AllowedScopes = {
-                    IdentityServerConstants.StandardScopes.OpenId,
-                    IdentityServerConstants.StandardScopes.Profile
-                }
-            };
-            // SPA client using implicit flow
-            var spaClient = new Client
-            {
-                ClientId = "spa",
-                ClientName = "SPA Client",
-                ClientUri = "http://identityserver.io",
-
-                AllowedGrantTypes = GrantTypes.Implicit,
-                AllowAccessTokensViaBrowser = true,
-
-                RedirectUris = {
-                    "http://localhost:5002/index.html",
-                    "http://localhost:5002/callback.html",
-                    "http://localhost:5002/silent.html",
-                    "http://localhost:5002/popup.html",
-                },
-
-                PostLogoutRedirectUris = { "http://localhost:5002/index.html" },
-                AllowedCorsOrigins = { "http://localhost:5002" },
-
-                AllowedScopes = { "openid", "profile", "api1" }
-            };
-            return new[]
-            {
-                credentialsClient,
-
-                hybridClient,
-
-                implClient,
-
-                spaClient
-            };
+            return clientConfigFile.Clients.Select(client => client.ToEntity());
         }
     }
 }

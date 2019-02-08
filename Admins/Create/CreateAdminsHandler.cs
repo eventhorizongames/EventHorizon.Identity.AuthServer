@@ -38,6 +38,10 @@ namespace EventHorizon.Identity.AuthServer.Admins.Create
                 .AddEnvironmentVariables()
                 .Build();
 
+            // Bind Admin Instance from Config
+            var admins = new AdminUserConfiguration();
+            config.Bind(admins);
+
             // Create Admin Roles
             await _mediator.Send(new RoleCreateEvent
             {
@@ -58,10 +62,6 @@ namespace EventHorizon.Identity.AuthServer.Admins.Create
                 RoleName = UserRoles.ADMIN,
                 Claim = new Claim(IdentityClaimTypes.PERMISSION, "identity.view"),
             });
-
-            // Create Admins
-            var admins = new AdminUserConfiguration();
-            config.Bind(admins);
             foreach (var admin in admins.Admins)
             {
                 var adminUser = _applicationDbContext.Users.FirstOrDefault(a => a.Email == admin.Email);

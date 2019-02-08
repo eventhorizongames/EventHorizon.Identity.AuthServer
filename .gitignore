@@ -292,3 +292,4 @@ tempkey.rsa
 
 appsettings.*.json
 admins.*.json
+clients.*.json
