@@ -18,7 +18,7 @@
                 "enabled": true,
                 "windows": {
                     "command": "cmd.exe",
-                    "args": "/C start http://localhost:5566"
+                    "args": "/C start https://localhost:23500"
                 },
                 "osx": {
                     "command": "open"
@@ -29,7 +29,7 @@
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "ASPNETCORE_URLS": "http://localhost:5566",
+                "ASPNETCORE_URLS": "https://localhost:23500",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
@@ -61,7 +61,7 @@
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Production",
-                "ASPNETCORE_URLS": "http://localhost:5000",
+                "ASPNETCORE_URLS": "http://localhost:23500",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
