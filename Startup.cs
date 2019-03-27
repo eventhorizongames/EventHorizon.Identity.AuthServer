@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
@@ -104,12 +105,27 @@ namespace EventHorizon.Identity.AuthServer
                 })
                 .AddAspNetIdentity<ApplicationUser>();
 
+            // Setup Forwared Header Options, injects the proxy configuration into known network and proxies.
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
+                    | ForwardedHeaders.XForwardedProto;
+                options.KnownNetworks.Add(
+                    new IPNetwork(
+                        IPAddress.Parse(
+                            Configuration["ProxyServer"]
+                        ).MapToIPv6(),
+                        104
+                    )
+                );
+                options.KnownProxies.Add(
+                    IPAddress.Parse(
+                        Configuration["ProxyServer"]
+                    ).MapToIPv6()
+                );
+            });
             if (Environment.IsDevelopment())
             {
-                services.Configure<ForwardedHeadersOptions>(options =>
-                {
-                    options.ForwardedHeaders = ForwardedHeaders.All;
-                });
                 identityServer.AddDeveloperSigningCredential();
             }
             else
@@ -146,6 +162,7 @@ namespace EventHorizon.Identity.AuthServer
 
         public void Configure(IApplicationBuilder app)
         {
+            app.UseForwardedHeaders();
             if (Environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -153,12 +170,6 @@ namespace EventHorizon.Identity.AuthServer
             }
             else
             {
-                app.UseForwardedHeaders();
-                app.Use((context, next) =>
-                {
-                    context.Request.Scheme = "https";
-                    return next();
-                });
                 app.UseExceptionHandler("/Home/Error");
             }
             AuthDatabase.InitializeDatabase(app.ApplicationServices);
