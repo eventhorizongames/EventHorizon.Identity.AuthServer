@@ -65,6 +65,7 @@ namespace EventHorizon.Identity.AuthServer
 
             var identityServer = services.AddIdentityServer(options =>
                 {
+                    options.IssuerUri = Configuration["IssuerUri"] ?? null;
                     options.Events.RaiseErrorEvents = true;
                     options.Events.RaiseInformationEvents = true;
                     options.Events.RaiseFailureEvents = true;
