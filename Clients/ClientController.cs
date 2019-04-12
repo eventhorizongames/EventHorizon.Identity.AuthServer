@@ -64,6 +64,7 @@ namespace EventHorizon.Identity.AuthServer.Clients
 
                 AllowOfflineAccess = entity.AllowOfflineAccess,
                 AllowAccessTokensViaBrowser = entity.AllowAccessTokensViaBrowser,
+                RequireClientSecret = entity.RequireClientSecret,
             });
         }
 
@@ -76,6 +77,7 @@ namespace EventHorizon.Identity.AuthServer.Clients
             entity.FrontChannelLogoutUri = model.FrontChannelLogoutUri ?? entity.FrontChannelLogoutUri;
             entity.AllowOfflineAccess = model.AllowOfflineAccess;
             entity.AllowAccessTokensViaBrowser = model.AllowAccessTokensViaBrowser;
+            entity.RequireClientSecret = model.RequireClientSecret;
 
             _configurationDbContext.Clients.Update(entity);
             _configurationDbContext.SaveChanges();

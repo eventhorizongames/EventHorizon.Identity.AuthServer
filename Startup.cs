@@ -111,19 +111,22 @@ namespace EventHorizon.Identity.AuthServer
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor
                     | ForwardedHeaders.XForwardedProto;
-                options.KnownNetworks.Add(
-                    new IPNetwork(
+                if (!String.IsNullOrEmpty(Configuration["ProxyServer"]))
+                {
+                    options.KnownNetworks.Add(
+                        new IPNetwork(
+                            IPAddress.Parse(
+                                Configuration["ProxyServer"]
+                            ).MapToIPv6(),
+                            104
+                        )
+                    );
+                    options.KnownProxies.Add(
                         IPAddress.Parse(
                             Configuration["ProxyServer"]
-                        ).MapToIPv6(),
-                        104
-                    )
-                );
-                options.KnownProxies.Add(
-                    IPAddress.Parse(
-                        Configuration["ProxyServer"]
-                    ).MapToIPv6()
-                );
+                        ).MapToIPv6()
+                    );
+                }
             });
             if (Environment.IsDevelopment())
             {

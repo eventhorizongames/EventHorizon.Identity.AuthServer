@@ -16,5 +16,6 @@ namespace EventHorizon.Identity.AuthServer.Clients.Models
         public string FrontChannelLogoutUri { get; set; }
         public bool AllowOfflineAccess { get; set; }
         public bool AllowAccessTokensViaBrowser { get; set; }
+        public bool RequireClientSecret { get; set; }
     }
 }
