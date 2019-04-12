@@ -4,3 +4,4 @@ out\
 admins.*.json
 clients.*.json
 appsettings.*.json
+global.json
