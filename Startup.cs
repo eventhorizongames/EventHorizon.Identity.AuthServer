@@ -42,7 +42,7 @@ namespace EventHorizon.Identity.AuthServer
         public void ConfigureServices(IServiceCollection services)
         {
             // The following line enables Application Insights telemetry collection.
-            services.AddApplicationInsightsTelemetry();
+            // services.AddApplicationInsightsTelemetry();
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
             services.AddMvc();
 
