@@ -44,12 +44,17 @@ namespace EventHorizon.Identity.AuthServer
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
             services.AddMvc();
 
+            var isSqlLiteConnectionType = IsSQLLiteConnectionType(Configuration["ConnectionType"]);
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                if (Environment.IsDevelopment())
+                if (isSqlLiteConnectionType)
+                {
+                    options.UseSqlite(connectionString);
+                }
+                else if (Environment.IsDevelopment())
                 {
                     options.UseInMemoryDatabase("development_db");
                 }
@@ -74,7 +79,13 @@ namespace EventHorizon.Identity.AuthServer
                 // this adds the config data from DB (clients, resources, CORS)
                 .AddConfigurationStore<HistoryExtendedConfigurationDbContext>(options =>
                 {
-                    if (Environment.IsDevelopment())
+                    if (isSqlLiteConnectionType)
+                    {
+                        options.ConfigureDbContext = builder =>
+                            builder.UseSqlite(connectionString,
+                                sql => sql.MigrationsAssembly(migrationsAssembly));
+                    }
+                    else if (Environment.IsDevelopment())
                     {
                         options.ConfigureDbContext = builder =>
                             builder.UseInMemoryDatabase("development_db");
@@ -89,7 +100,13 @@ namespace EventHorizon.Identity.AuthServer
                 // this adds the operational data from DB (codes, tokens, consents)
                 .AddOperationalStore(options =>
                 {
-                    if (Environment.IsDevelopment())
+                    if (isSqlLiteConnectionType)
+                    {
+                        options.ConfigureDbContext = builder =>
+                            builder.UseSqlite(connectionString,
+                                sql => sql.MigrationsAssembly(migrationsAssembly));
+                    }
+                    else if (Environment.IsDevelopment())
                     {
                         options.ConfigureDbContext = builder =>
                             builder.UseInMemoryDatabase("development_db");
@@ -176,13 +193,39 @@ namespace EventHorizon.Identity.AuthServer
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-            AuthDatabase.InitializeDatabase(app.ApplicationServices);
+            AuthDatabase.InitializeDatabase(
+                app.ApplicationServices,
+                RunMigrations(
+                    Configuration["ConnectionType"],
+                    Environment.IsDevelopment()
+                )
+            );
 
             app.UseCors("default");
             app.UseIdentityServer();
 
             app.UseStaticFiles();
             app.UseMvcWithDefaultRoute();
+        }
+
+        private static bool RunMigrations(
+            string connectionType,
+            bool isDevelopment
+        )
+        {
+            return IsSQLLiteConnectionType(
+                connectionType
+            ) || !isDevelopment;
+        }
+        private static bool IsSQLLiteConnectionType(
+            string connectionType
+        )
+        {
+            return !String.IsNullOrEmpty(
+                connectionType
+            ) && "SQLLITE".Equals(
+                connectionType
+            );
         }
     }
 }

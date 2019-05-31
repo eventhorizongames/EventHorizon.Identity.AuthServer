@@ -31,20 +31,17 @@ namespace EventHorizon.Identity.AuthServer.Migrations.RunMigration
 
         public Task<bool> Handle(RunMigrationCommand request, CancellationToken cancellationToken)
         {
-            if (!_hostingEnvironment.IsDevelopment())
-            {
-                _applicationDbContext
-                    .Database
-                    .Migrate();
+            _applicationDbContext
+                .Database
+                .Migrate();
 
-                _persistedGrantDbContext
-                    .Database
-                    .Migrate();
+            _persistedGrantDbContext
+                .Database
+                .Migrate();
 
-                _historyExtendedConfigurationDbContext
-                    .Database
-                    .Migrate();
-            }
+            _historyExtendedConfigurationDbContext
+                .Database
+                .Migrate();
             return Task.FromResult(true);
         }
     }

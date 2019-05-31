@@ -26,7 +26,7 @@ namespace EventHorizon.Identity.AuthServer
 
             if (initDb)
             {
-                AuthDatabase.InitializeDatabase(host.Services);
+                AuthDatabase.InitializeDatabase(host.Services, true);
                 return;
             }
 

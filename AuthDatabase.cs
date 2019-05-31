@@ -28,13 +28,19 @@ namespace EventHorizon.Identity.AuthServer
 {
     public static class AuthDatabase
     {
-        public static void InitializeDatabase(IServiceProvider services)
+        public static void InitializeDatabase(
+            IServiceProvider services,
+            bool runMigration
+        )
         {
             using (var serviceScope = services.GetService<IServiceScopeFactory>().CreateScope())
             {
                 var mediator = serviceScope.ServiceProvider.GetRequiredService<IMediator>();
-                serviceScope.MigrateContexts(mediator)
-                    .GetAwaiter().GetResult();
+                if (runMigration)
+                {
+                    serviceScope.MigrateContexts(mediator)
+                        .GetAwaiter().GetResult();
+                }
                 serviceScope.CreateAdmins(mediator)
                     .GetAwaiter().GetResult();
                 serviceScope.CreateConfiguration(mediator)
