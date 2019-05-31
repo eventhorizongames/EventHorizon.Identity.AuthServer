@@ -30,7 +30,7 @@ namespace EventHorizon.Identity.AuthServer.Users
         [HttpGet]
         public async Task<IActionResult> Index(
             [FromQuery] int page = 1,
-            [FromQuery] int take = 1
+            [FromQuery] int take = 25
         )
         {
             var model = new UserViewModel
