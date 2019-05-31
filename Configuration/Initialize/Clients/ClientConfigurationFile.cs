@@ -5,7 +5,7 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.Clients
 {
     public class ClientConfigurationFile
     {
-        public List<ClientConfiguration> Clients { get; set; }
+        public List<ClientConfiguration> Clients { get; set; } = new List<ClientConfiguration>();
     }
     public class ClientConfiguration : Client
     {
