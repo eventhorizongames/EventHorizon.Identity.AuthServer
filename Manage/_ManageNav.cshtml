@@ -1,0 +1,27 @@
+﻿@inject SignInManager<ApplicationUser> SignInManager;
+
+@{
+    bool isAdmin = Context.User?.IsInRole("Admin") ?? false;
+}
+<ul class="nav nav-pills nav-stacked">
+    <li class="@ManageNavPages.IndexNavClass(ViewContext)">
+        <a id="open-profile" asp-page="/Manage/Index">Profile</a>
+    </li>
+    <li class="@ManageNavPages.ChangePasswordNavClass(ViewContext)">
+        <a id="open-password" asp-page="/Manage/ChangePassword/Index">Password</a>
+    </li>
+    <li class="@ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)">
+        <a id="open-two-factor" asp-page="/Manage/TwoFactor/Index">Two-factor authentication</a>
+    </li>
+    <li>
+        <a id="open-grants" asp-page="/Grants/Index">Grants</a>
+    </li>
+@if(isAdmin) {
+    <li>
+        <a id="open-diagnostics" asp-page="/Diagnostics/Index">Diagnostics</a>
+    </li>
+}
+    <li class="@ManageNavPages.PurgeAccountNavClass(ViewContext)">
+        <a id="purge-account" asp-page="/Manage/PurgeAccount">Purge Account</a>
+    </li>
+</ul>

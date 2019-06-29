@@ -1,29 +1,38 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using EventHorizon.Identity.AuthServer.Register;
+using EventHorizon.Identity.AuthServer.Identity;
 
 namespace Microsoft.AspNetCore.Mvc
 {
     public static class UrlHelperExtensions
     {
-        public static string EmailConfirmationLink(this IUrlHelper urlHelper, string userId, string code, string scheme)
+        public static string EmailConfirmationLink(
+            this IUrlHelper urlHelper, 
+            string userId, 
+            string code, 
+            string scheme
+        )
         {
-            return urlHelper.Action(
-                action: nameof(RegisterController.ConfirmEmail),
-                controller: "Register",
+            return urlHelper.Page(
+                pageName: "/Account/ConfirmEmail",
+                pageHandler: "/Register/Index",
                 values: new { userId, code },
-                protocol: scheme);
+                protocol: scheme
+            );
         }
 
-        public static string ResetPasswordCallbackLink(this IUrlHelper urlHelper, string userId, string code, string scheme)
+        public static string ResetPasswordCallbackLink(
+            this IUrlHelper urlHelper, 
+            string userId, 
+            string code, 
+            string scheme)
+        
         {
-            return urlHelper.Action(
-                action: nameof(RegisterController.ResetPassword),
-                controller: "Register",
+            return urlHelper.Page(
+                pageName: "/Account/ResetPassword",
+                pageHandler: "/Register/Index",
                 values: new { userId, code },
-                protocol: scheme);
+                protocol: scheme
+            );
         }
     }
 }

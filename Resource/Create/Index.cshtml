@@ -1,0 +1,19 @@
+﻿@page
+@model EventHorizon.Identity.AuthServer.Resource.Create.IndexModel
+@{
+}
+
+<h3>Create New Api Resource</h3>
+<form method="POST" asp-page="./Index">
+    <input type="hidden" asp-for="ReturnUrl" />
+    <div asp-validation-summary="All"></div>
+    <div class="form-group">
+        <label asp-for="Name">New Name</label>
+        <input asp-for="Name" class="form-control" placeholder="New Name" />                    
+    </div>
+    <div class="form-group">
+        <label asp-for="DisplayName">New Display Name</label>
+        <input asp-for="DisplayName" class="form-control" placeholder="New Display Name" />                    
+    </div>
+    <button class="btn btn-default" type="submit">Create</button>
+</form>

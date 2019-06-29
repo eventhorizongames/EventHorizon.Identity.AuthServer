@@ -1,0 +1,97 @@
+﻿@page
+@model Disable2faModel;
+@using Microsoft.Extensions.Logging;
+@using Microsoft.AspNetCore.Identity;
+@using Microsoft.AspNetCore.Mvc.RazorPages;
+@using EventHorizon.Identity.AuthServer.Models;
+
+@{
+    ViewData["Title"] = "Disable two-factor authentication (2FA)";
+    ViewData.AddActivePage(ManageNavPages.TwoFactorAuthentication);
+}
+
+@functions {
+    public class Disable2faModel : PageModel 
+    {
+        readonly ILogger _logger;
+        readonly UserManager<ApplicationUser> _userManager;
+
+        public Disable2faModel(
+            ILogger<Disable2faModel> logger,
+            UserManager<ApplicationUser> userManager
+        ) {
+            _logger = logger;
+            _userManager = userManager;   
+        }
+        
+        public async Task OnGetAsync() 
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
+            {
+                throw new ApplicationException(
+                    $"Unable to load user with ID '{_userManager.GetUserId(User)}'."
+                );
+            }
+
+            if (!user.TwoFactorEnabled)
+            {
+                throw new ApplicationException(
+                    $"Unexpected error occurred disabling 2FA for user with ID '{user.Id}'."
+                );
+            }
+        }
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPostAsync() 
+        {
+            var user = await _userManager.GetUserAsync(
+                User
+            );
+            if (user == null)
+            {
+                throw new ApplicationException(
+                    $"Unable to load user with ID '{_userManager.GetUserId(User)}'."
+                );
+            }
+
+            var disable2faResult = await _userManager.SetTwoFactorEnabledAsync(
+                user, 
+                false
+            );
+            if (!disable2faResult.Succeeded)
+            {
+                throw new ApplicationException(
+                    $"Unexpected error occured disabling 2FA for user with ID '{user.Id}'."
+                );
+            }
+
+            _logger.LogInformation(
+                "User with ID {UserId} has disabled 2fa.", 
+                user.Id
+            );
+            return RedirectToPage(
+                "./Index"
+            );
+        }
+    }
+}
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="alert alert-warning" role="alert">
+    <p>
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        <strong>This action only disables 2FA.</strong>
+    </p>
+    <p>
+        Disabling 2FA does not change the keys used in authenticator apps. If you wish to change the key
+        used in an authenticator app you should <a asp-page="./ResetAuthenticator">reset your
+        authenticator keys.</a>
+    </p>
+</div>
+
+<div>
+    <form asp-page="./Disable2fa" method="post" class="form-group">
+        <button class="btn btn-danger" type="submit">Disable 2FA</button>
+    </form>
+</div>

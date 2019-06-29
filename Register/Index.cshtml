@@ -1,0 +1,142 @@
+﻿@page
+@model IndexModel
+
+@using MediatR;
+@using EventHorizon.Identity.AuthServer.Services;
+@using EventHorizon.Identity.AuthServer.Services.User;
+@using EventHorizon.Identity.AuthServer.Register.Models;
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+@functions {
+    public class IndexModel : PageModel {
+
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+        readonly IEmailSender _emailSender;
+        readonly ILogger _logger;
+        readonly IMediator _mediator;
+
+        public IndexModel(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            IEmailSender emailSender,
+            ILogger<IndexModel> logger,
+            IMediator mediator)
+        {
+            _userManager = userManager;
+            _signInManager = signInManager;
+            _emailSender = emailSender;
+            _logger = logger;
+            _mediator = mediator;
+        }
+
+        [BindProperty]
+        public UserRegistrationModel UserRegistration { get; set; }
+
+        public void OnGet(
+            string returnUrl
+        ) {
+            ViewData["ReturnUrl"] = returnUrl;
+        }
+
+        public async Task<IActionResult> OnPost(
+            string returnUrl = null
+        )
+        {
+            ViewData["ReturnUrl"] = returnUrl;
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+            var user = new ApplicationUser
+            {
+                UserName = UserRegistration.Email,
+                Email = UserRegistration.Email
+            };
+            var result = await _mediator.Send(
+                new UserCreateEvent
+                {
+                    User = user,
+                    Profile = new ApplicationUserProfile
+                    {
+                        PhoneNumber = UserRegistration.Profile.PhoneNumber,
+                        FirstName = UserRegistration.Profile.FirstName,
+                        LastName = UserRegistration.Profile.LastName,
+                    },
+                    Password = UserRegistration.Password
+                });
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User created a new account with password.");
+
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
+                await _emailSender.SendEmailConfirmationAsync(UserRegistration.Email, callbackUrl);
+
+                await _signInManager.SignInAsync(user, isPersistent: false);
+                _logger.LogInformation("User created a new account with password.");
+                return RedirectToLocal(returnUrl);
+            }
+            AddErrors(result);
+
+            // If we got this far, something failed, redisplay form
+            return Page();
+        }
+
+        private void AddErrors(IdentityResult result)
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+        }
+
+        private IActionResult RedirectToLocal(string returnUrl)
+        {
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            else
+            {
+                return RedirectToPage("/Home");
+            }
+        }
+    }
+}
+
+<h2 id="page-title">@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-4">
+        <form  class="registration-form" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+            <h4 id="page-description">Create a new account.</h4>
+            <hr />
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="UserRegistration.Email"></label>
+                <input asp-for="UserRegistration.Email" class="form-control" />
+                <span asp-validation-for="UserRegistration.Email" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UserRegistration.Password"></label>
+                <input asp-for="UserRegistration.Password" class="form-control" />
+                <span asp-validation-for="UserRegistration.Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="UserRegistration.ConfirmPassword"></label>
+                <input asp-for="UserRegistration.ConfirmPassword" class="form-control" />
+                <span asp-validation-for="UserRegistration.ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button id="submit" type="submit" class="btn btn-default">Register</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

@@ -1,0 +1,62 @@
+﻿@page "{id}"
+
+@using MediatR;
+@using Microsoft.AspNetCore.Identity;
+@using EventHorizon.Identity.AuthServer.Models;
+@using EventHorizon.Identity.AuthServer.Users.Models;
+@using EventHorizon.Identity.AuthServer.Users.Services.Fetch;
+
+@inject IMediator mediator
+@inject UserManager<ApplicationUser> userManager
+
+@functions {
+    [BindProperty]
+    public UserDisplayModel UserModel { get; private set; }
+
+    public async Task OnGet(
+        string id
+    )
+    {
+        UserModel =(await mediator.Send(
+                new QueryForListOfUsers()
+            )).Where(
+                user => user.Id == id
+            ).Select(user =>
+                new UserDisplayModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email
+                }
+            ).FirstOrDefault();
+    }
+}
+
+<div class="user">
+    <h3>User Details</h3>
+    <div class="back" >
+        <a asp-page="../Index">< Back to User List</a>
+    </div>
+@if(Model.UserModel == null) 
+{
+    <div>User not Found.</div>
+}
+@if (Model.UserModel != null)
+{
+    <div>
+        <span class="bold">Email: </span>@(Model.UserModel.Email)
+    </div>
+    <div>
+        <span class="bold">UserName: </span>@(Model.UserModel.UserName)
+    </div>
+}
+</div>
+
+<style>
+    .user .back {
+        padding: 0em 0em 1em 0em;
+    }
+    .user .bold {
+        font-weight: bold;
+    }
+</style>

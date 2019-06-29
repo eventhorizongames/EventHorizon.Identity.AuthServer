@@ -1,0 +1,21 @@
+@page
+@model IndexModel;
+@using Microsoft.AspNetCore.Http;
+@functions {
+    public class IndexModel : PageModel
+    {
+        public IHeaderDictionary Headers { get; private set; }
+        public string Scheme { get; private set; }
+
+        public void OnGet() {
+            Headers = HttpContext.Request.Headers;
+            Scheme = HttpContext.Request.Scheme;
+        }
+    }
+}
+
+@foreach (var header in Model.Headers)
+{
+    <div><span style="font-weight: bold">@header.Key: </span>@header.Value</div>
+}
+<div><span style="font-weight: bold">Scheme: </span>@Model.Scheme</div>

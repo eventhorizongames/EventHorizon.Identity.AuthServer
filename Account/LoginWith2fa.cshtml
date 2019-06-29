@@ -1,0 +1,149 @@
+@page
+@model LoginWith2faViewModel
+@{
+    ViewData["Title"] = "Two-factor authentication";
+}
+
+@functions {
+    public class LoginWith2faViewModel : PageModel 
+    {
+        private readonly ILogger _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+
+        public LoginWith2faViewModel(
+            ILogger<LoginWith2faViewModel> logger,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager
+        )
+        {
+            _logger = logger;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+
+
+        [Required]
+        [BindProperty]
+        [StringLength(7, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [DataType(DataType.Text)]
+        [Display(Name = "Authenticator code")]
+        public string TwoFactorCode { get; set; }
+
+        [BindProperty]
+        [Display(Name = "Remember this machine")]
+        public bool RememberMachine { get; set; }
+
+        [BindProperty]
+        public bool RememberMe { get; set; }
+        [BindProperty]
+        public string ReturnUrl { get; set; }
+
+
+        
+        public async Task OnGet(
+            string returnUrl
+        )
+        {
+            ReturnUrl = returnUrl;
+            // Ensure the user has gone through the username & password screen first
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load two-factor authentication user.");
+            }
+
+            ViewData["ReturnUrl"] = returnUrl;
+        }
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPost()
+        {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            var user = await _signInManager.GetTwoFactorAuthenticationUserAsync();
+            if (user == null)
+            {
+                throw new ApplicationException($"Unable to load user with ID '{_userManager.GetUserId(User)}'.");
+            }
+
+            var authenticatorCode = TwoFactorCode.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+            var result = await _signInManager.TwoFactorAuthenticatorSignInAsync(
+                authenticatorCode, 
+                RememberMe, 
+                RememberMachine
+            );
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User with ID {UserId} logged in with 2fa.", user.Id);
+                return RedirectToLocal(ReturnUrl);
+            }
+            else if (result.IsLockedOut)
+            {
+                _logger.LogWarning("User with ID {UserId} account locked out.", user.Id);
+                return RedirectToPage("./Lockout");
+            }
+            else
+            {
+                _logger.LogWarning("Invalid authenticator code entered for user with ID {UserId}.", user.Id);
+                ModelState.AddModelError(string.Empty, "Invalid authenticator code.");
+                return Page();
+            }
+        }
+
+        private IActionResult RedirectToLocal(string returnUrl)
+        {
+            if (Url.IsLocalUrl(returnUrl))
+            {
+                return Redirect(returnUrl);
+            }
+            else
+            {
+                return RedirectToPage("/Home");
+            }
+        }
+    }
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+<p>Your login is protected with an authenticator app. Enter your authenticator code below.</p>
+<div class="row">
+    <div class="col-md-4">
+        <form method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]">
+            <input asp-for="RememberMe" type="hidden" />
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="TwoFactorCode"></label>
+                <input asp-for="TwoFactorCode" class="form-control" autocomplete="off" />
+                <span asp-validation-for="TwoFactorCode" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <div class="checkbox">
+                    <label asp-for="RememberMachine">
+                        <input asp-for="RememberMachine" />
+                        @Html.DisplayNameFor(m => m.RememberMachine)
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-default">Log in</button>
+            </div>
+        </form>
+    </div>
+</div>
+<p>
+    Don't have access to your authenticator device? You can 
+    <a asp-page="./LoginWithRecoveryCode" asp-route-returnUrl="@ViewData["ReturnUrl"]">log in with a recovery code</a>.
+</p>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

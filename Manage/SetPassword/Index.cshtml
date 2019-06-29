@@ -1,0 +1,157 @@
+﻿@page
+@model IndexModel;
+
+@{
+    ViewData["Title"] = "Set password";
+    ViewData.AddActivePage(ManageNavPages.ChangePassword);
+}
+
+@functions {
+    public class IndexModel : PageModel
+    {
+        readonly ILogger _logger;
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+
+        public IndexModel(
+            ILogger<IndexModel> logger,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager
+        )
+        {
+            _logger = logger;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+        [Required]
+        [DataType(DataType.Password)]
+        [Display(Name = "Current password")]
+        [BindProperty]
+        public string OldPassword { get; set; }
+
+        [Required]
+        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "New password")]
+        [BindProperty]
+        public string NewPassword { get; set; }
+
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm new password")]
+        [Compare("NewPassword", ErrorMessage = "The new password and confirmation password do not match.")]
+        [BindProperty]
+        public string ConfirmPassword { get; set; }
+
+        [TempData]
+        public string StatusMessage { get; set; }
+
+        public async Task<IActionResult> OnGetAsync()
+        {
+            var user = await _userManager.GetUserAsync(
+                User
+            );
+            if (user == null)
+            {
+                throw new ApplicationException(
+                    $"Unable to load user with ID '{_userManager.GetUserId(User)}'."
+                );
+            }
+
+            var hasPassword = await _userManager.HasPasswordAsync(
+                user
+            );
+
+            if (hasPassword)
+            {
+                return RedirectToPage(
+                    "../ChangePassword/Index"
+                );
+            }
+
+            return Page();
+        }
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                return Page();
+            }
+
+            var user = await _userManager.GetUserAsync(
+                User
+            );
+            if (user == null)
+            {
+                throw new ApplicationException(
+                    $"Unable to load user with ID '{_userManager.GetUserId(User)}'."
+                );
+            }
+
+            var addPasswordResult = await _userManager.AddPasswordAsync(
+                user, 
+                NewPassword
+            );
+            if (!addPasswordResult.Succeeded)
+            {
+                AddErrors(
+                    addPasswordResult
+                );
+                return Page();
+            }
+
+            await _signInManager.SignInAsync(
+                user, 
+                isPersistent: false
+            );
+            StatusMessage = "Your password has been set.";
+
+            return RedirectToPage(
+                "./Index"
+            );
+        }
+        private void AddErrors(
+            IdentityResult result
+        )
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(
+                    string.Empty, 
+                    error.Description
+                );
+            }
+        }
+    }
+}
+
+<h4>Set your password</h4>
+@await Html.PartialAsync("_StatusMessage", Model.StatusMessage)
+<p class="text-info">
+    You do not have a local username/password for this site. Add a local
+    account so you can log in without an external login.
+</p>
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="NewPassword"></label>
+                <input asp-for="NewPassword" class="form-control" />
+                <span asp-validation-for="NewPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-default">Set password</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

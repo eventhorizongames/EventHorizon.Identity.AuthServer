@@ -3,28 +3,22 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using EventHorizon.Identity;
 using EventHorizon.Identity.AuthServer.Application;
 using EventHorizon.Identity.AuthServer.Configuration;
-using EventHorizon.Identity.AuthServer.Identity;
 using EventHorizon.Identity.AuthServer.Models;
 using EventHorizon.Identity.AuthServer.Services;
 using EventHorizon.Identity.AuthServer.Services.Claims;
-using EventHorizon.Identity.AuthServer.Services.User;
-using IdentityServer4;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.EntityFramework.Mappers;
+using EventHorizon.Identity.AuthServer.Services.Models;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
 
 namespace EventHorizon.Identity.AuthServer
 {
@@ -42,7 +36,20 @@ namespace EventHorizon.Identity.AuthServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
-            services.AddMvc();
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+                .AddRazorPagesOptions(options =>
+                {
+                    options.RootDirectory = "/";
+                    options.Conventions.AuthorizeFolder("/Clients", "Identity Admin");
+                    options.Conventions.AuthorizeFolder("/Resource", "Identity Admin");
+                    options.Conventions.AuthorizeFolder("/Users", "Identity Admin");
+                    options.Conventions.AuthorizeFolder("/Diagnostics", "Identity Admin");
+                    options.Conventions.AuthorizeFolder("/Manage");
+                    options.Conventions.AuthorizeFolder("/Grants");
+                    options.Conventions.AuthorizeFolder("/Consent");
+
+                });
 
             var isSqlLiteConnectionType = IsSQLLiteConnectionType(Configuration["ConnectionType"]);
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
@@ -178,7 +185,17 @@ namespace EventHorizon.Identity.AuthServer
             });
 
 
-            services.AddScoped<IEmailSender, EmailSender>();
+            if (Environment.IsDevelopment())
+            {
+                services.AddScoped<IEmailSender, SaveToFileEmailSender>();
+            }
+            else
+            {
+                services.AddScoped<IEmailSender, EmailSender>();
+            }
+            services.Configure<AuthMessageSenderOptions>(
+                Configuration.GetSection("Email")
+            );
         }
 
         public void Configure(IApplicationBuilder app)

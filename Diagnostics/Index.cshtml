@@ -1,0 +1,79 @@
+@page
+@model IndexModel
+
+@using System.Text;
+@using IdentityModel;
+@using Microsoft.AspNetCore.Authentication;
+@using Newtonsoft.Json;
+
+@functions {
+    [SecurityHeaders]
+    public class IndexModel : PageModel 
+    {
+        public AuthenticateResult AuthenticateResult { get; private set; }
+        public IEnumerable<string> Clients { get; private set; } = new List<string>();
+
+        public async Task<IActionResult> OnGet() 
+        {
+            var localAddresses = new string[] { 
+                "127.0.0.1", 
+                "::1", 
+                HttpContext.Connection.LocalIpAddress.ToString() 
+            };
+            if (!localAddresses.Contains(
+                HttpContext.Connection.RemoteIpAddress.ToString()
+            ))
+            {
+                return NotFound();
+            }
+
+            AuthenticateResult = await HttpContext.AuthenticateAsync();
+
+            if (AuthenticateResult.Properties.Items.ContainsKey(
+                "client_list"
+            ))
+            {
+                Clients = JsonConvert.DeserializeObject<string[]>(
+                    Encoding.UTF8.GetString(
+                        Base64Url.Decode(
+                            AuthenticateResult.Properties.Items["client_list"]
+                        )
+                    )
+                );
+            }
+
+            return Page();
+        }
+    }
+}
+
+<h1 id="page-title">Authentication cookie</h1>
+
+<h3>Claims</h3>
+<dl>
+    @foreach (var claim in Model.AuthenticateResult.Principal.Claims)
+    {
+        <dt>@claim.Type</dt>
+        <dd>@claim.Value</dd>
+    }
+</dl>
+
+<h3>Properties</h3>
+<dl>
+    @foreach (var prop in Model.AuthenticateResult.Properties.Items)
+    {
+        <dt>@prop.Key</dt>
+        <dd>@prop.Value</dd>
+    }
+</dl>
+
+@if (Model.Clients.Any())
+{
+    <h3>Clients</h3>
+    <ul>
+        @foreach (var client in Model.Clients)
+        {
+            <li>@client</li>
+        }
+    </ul>
+}

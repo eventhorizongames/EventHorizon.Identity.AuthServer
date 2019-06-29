@@ -1,0 +1,41 @@
+@page "/Resource/{resourceId}/Remove/Scope/{id:int}"
+@using EventHorizon.Identity.AuthServer.Configuration;
+@using Microsoft.EntityFrameworkCore;
+
+@inject HistoryExtendedConfigurationDbContext _configurationDbContext;
+
+@functions {
+    public async Task<IActionResult> OnPost(
+        string resourceId,
+        int id
+    )
+    {
+        var apiResource = _configurationDbContext.ApiResources
+            .Include(
+                "Scopes"
+            ).FirstOrDefault(
+                a => a.Name == resourceId
+            );
+        var scope = apiResource.Scopes
+            .FirstOrDefault(
+                a => a.Id == id
+            );
+        if (scope != null)
+        {
+            apiResource.Scopes.Remove(
+                scope
+            );
+            _configurationDbContext.Update(
+                apiResource
+            );
+            await _configurationDbContext.SaveChangesAsync();
+        }
+
+        return RedirectToPage(
+            "../Index", 
+            new { 
+                Id = resourceId 
+            }
+        );
+    }
+}

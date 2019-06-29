@@ -1,0 +1,33 @@
+@page "/Clients/{clientId}/Add/Grant"
+@using EventHorizon.Identity.AuthServer.Clients.Models;
+@using IdentityServer4.Models
+@using EventHorizon.Identity.AuthServer.Configuration;
+@using IdentityServer4.EntityFramework.Entities;
+
+@inject HistoryExtendedConfigurationDbContext _configurationDbContext;
+
+@functions {
+    [BindProperty]
+    public AddGrantModel Grant { get; set; }
+
+    public async Task<IActionResult> OnPost(
+        string clientId
+    )
+    {
+        var grantTypeCount = _configurationDbContext.ClientGrantTypes
+            .Where(
+                a => a.Client.ClientId == clientId && a.GrantType == Grant.GrantTypeSelect
+            ).Count();
+        if (grantTypeCount == 0)
+        {
+            await _configurationDbContext.ClientGrantTypes.AddAsync(new ClientGrantType
+            {
+                Client = _configurationDbContext.Clients.First(a => a.ClientId == clientId),
+                GrantType = Grant.GrantTypeSelect,
+            });
+            await _configurationDbContext.SaveChangesAsync();
+        }
+
+        return RedirectToPage("../Index", new { Id = clientId });
+    }
+}

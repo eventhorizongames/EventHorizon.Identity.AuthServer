@@ -293,3 +293,5 @@ tempkey.rsa
 appsettings.*.json
 admins.*.json
 clients.*.json
+App_Data/identity.db
+App_Data/EmailTesting

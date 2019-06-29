@@ -1,0 +1,183 @@
+﻿@page
+@model IndexModel;
+
+@{
+    ViewData["Title"] = "Change password";
+    ViewData.AddActivePage(ManageNavPages.ChangePassword);
+}
+
+@functions {
+    public class IndexModel : PageModel
+    {
+        readonly ILogger _logger;
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+
+        public IndexModel(
+            ILogger<IndexModel> logger,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager
+        )
+        {
+            _logger = logger;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+        [Required]
+        [DataType(
+            DataType.Password
+        )]
+        [Display(
+            Name = "Current password"
+        )]
+        [BindProperty]
+        public string OldPassword { get; set; }
+
+        [Required]
+        [StringLength(
+            100, 
+            ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", 
+            MinimumLength = 6
+        )]
+        [DataType(
+            DataType.Password
+        )]
+        [Display(
+            Name = "New password"
+        )]
+        [BindProperty]
+        public string NewPassword { get; set; }
+
+        [DataType(
+            DataType.Password
+        )]
+        [Display(
+            Name = "Confirm new password"
+        )]
+        [Compare(
+            "NewPassword", 
+            ErrorMessage = "The new password and confirmation password do not match."
+        )]
+        [BindProperty]
+        public string ConfirmPassword { get; set; }
+
+        [TempData]
+        public string StatusMessage { get; set; }
+
+        public async Task<IActionResult> OnGetAsync()
+        {
+            var user = await _userManager.GetUserAsync(
+                User
+            );
+            if (user == null)
+            {
+                throw new ApplicationException(
+                    $"Unable to load user with ID '{_userManager.GetUserId(User)}'."
+                );
+            }
+
+            var hasPassword = await _userManager.HasPasswordAsync(
+                user
+            );
+            if (!hasPassword)
+            {
+                return RedirectToPage(
+                    "../SetPassword/Index"
+                );
+            }
+            return Page();
+        }
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPostAsync()
+        {
+            if (!ModelState.IsValid)
+            {
+                return RedirectToPage(
+                    "./Index"
+                );
+            }
+
+            var user = await _userManager.GetUserAsync(
+                User
+            );
+            if (user == null)
+            {
+                throw new ApplicationException(
+                    $"Unable to load user with ID '{_userManager.GetUserId(User)}'."
+                );
+            }
+
+            var changePasswordResult = await _userManager.ChangePasswordAsync(
+                user,
+                OldPassword,
+                NewPassword
+            );
+            if (!changePasswordResult.Succeeded)
+            {
+                AddErrors(
+                    changePasswordResult
+                );
+                return RedirectToPage(
+                    "./Index"
+                );
+            }
+
+            await _signInManager.SignInAsync(
+                user, 
+                isPersistent: false
+            );
+            _logger.LogInformation(
+                "User changed their password successfully."
+            );
+            StatusMessage = "Your password has been changed.";
+
+            return RedirectToPage(
+                "./Index"
+            );
+        }
+        private void AddErrors(
+            IdentityResult result
+        )
+        {
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(
+                    string.Empty, 
+                    error.Description
+                );
+            }
+        }
+    }
+}
+
+<h4 id="change-password-header">@ViewData["Title"]</h4>
+@await Html.PartialAsync("_StatusMessage", Model.StatusMessage)
+<div class="row">
+    <div class="col-md-6">
+        <form id="change-password-form" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="OldPassword"></label>
+                <input asp-for="OldPassword" class="form-control" />
+                <span asp-validation-for="OldPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="NewPassword"></label>
+                <input asp-for="NewPassword" class="form-control" />
+                <span asp-validation-for="NewPassword" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ConfirmPassword"></label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-default">Update password</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

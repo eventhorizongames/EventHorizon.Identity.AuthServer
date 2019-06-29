@@ -3,7 +3,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using EventHorizon.Identity.AuthServer.Manage.Models;
 using EventHorizon.Identity.AuthServer.Models;
 using IdentityModel;
 using MediatR;
@@ -27,11 +26,12 @@ namespace EventHorizon.Identity.AuthServer.Services.User
             var result = await _userManager.CreateAsync(notification.User, notification.Password);
             if (result.Succeeded)
             {
-                await _mediator.Publish(new UserSetProfileClaimsEvent
-                {
-                    User = notification.User,
-                    Profile = notification.Profile,
-                });
+                await _mediator.Publish(
+                    new UserSetProfileClaimsEvent(
+                        notification.User,
+                        notification.Profile
+                    )
+                );
             }
             return result;
         }

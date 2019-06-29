@@ -1,9 +1,11 @@
 ﻿@using IdentityServer4.Extensions
 @{
     string name = null;
+    bool isAdmin = false;
     if (!true.Equals(ViewData["signed-out"]))
     {
         name = Context.User?.GetDisplayName();
+        isAdmin = Context.User?.IsInRole("Admin") ?? false;
     }
 }
 <!DOCTYPE html>
@@ -12,11 +14,12 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>EventHorizon Game Studio Identity</title>
+    <title>EventHorizon Game Studio Identity - @ViewData["Title"]</title>
     <link rel="icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    @RenderSection("styles", required: false)
 </head>
 <body>
     <div class="navbar navbar-inverse">
@@ -42,8 +45,14 @@
                     <li class="dropdown">
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown">@name <b class="caret"></b></a>
                         <ul class="dropdown-menu">
-                            <li><a asp-controller="Manage">Manage</a></li>
-                            <li><a asp-action="Logout" asp-controller="Account">Logout</a></li>
+                            <li><a asp-page="/Manage/Index">Manage</a></li>
+                            <li><a asp-page="/Account/Logout" asp-route-redirectUrl="/">Logout</a></li>
+                            <li></li>
+                            @if(isAdmin) {
+                            <li><a asp-page="/Clients/Index">Clients</a></li>
+                            <li><a asp-page="/Resource/Index">Resources</a></li>
+                            <li><a asp-page="/Users/Index">Users</a></li>
+                            }
                         </ul>
                     </li>
                 </ul>

@@ -1,0 +1,41 @@
+@page "/Resource/{resourceId}/Remove/UserClaim/{id:int}"
+@using EventHorizon.Identity.AuthServer.Configuration;
+@using Microsoft.EntityFrameworkCore;
+
+@inject HistoryExtendedConfigurationDbContext _configurationDbContext;
+
+@functions {
+    public async Task<IActionResult> OnPost(
+        string resourceId,
+        int id
+    )
+    {
+        var apiResource = _configurationDbContext.ApiResources
+            .Include(
+                "UserClaims"
+            ).FirstOrDefault(
+                a => a.Name == resourceId
+            );
+        var userClaim = apiResource.UserClaims
+            .FirstOrDefault(
+                a => a.Id == id
+            );
+        if (userClaim != null)
+        {
+            apiResource.UserClaims.Remove(
+                userClaim
+            );
+            _configurationDbContext.Update(
+                apiResource
+            );
+            await _configurationDbContext.SaveChangesAsync();
+        }
+
+        return RedirectToPage(
+            "../Index", 
+            new { 
+                Id = resourceId
+            }
+        );
+    }
+}

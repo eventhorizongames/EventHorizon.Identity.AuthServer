@@ -1,5 +1,3 @@
-using EventHorizon.Identity.AuthServer.Models;
-
 namespace EventHorizon.Identity.AuthServer.Users.Models
 {
     public class UserDisplayModel

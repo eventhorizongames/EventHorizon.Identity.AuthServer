@@ -1,0 +1,80 @@
+@page
+
+@inject UserManager<ApplicationUser> UserManager;
+
+@{
+    ViewData["Title"] = "Two-factor authentication";
+    ViewData.AddActivePage(ManageNavPages.TwoFactorAuthentication);
+}
+
+@functions {
+    [BindProperty]
+    public bool HasAuthenticator { get; private set; }
+    [BindProperty]
+    public int RecoveryCodesLeft { get; private set; }
+    [BindProperty]
+    public bool Is2faEnabled { get; private set; }
+
+    public async Task OnGetAsync()
+    {
+        var user = await UserManager.GetUserAsync(User);
+        if (user == null)
+        {
+            throw new ApplicationException(
+                $"Unable to load user with ID '{UserManager.GetUserId(User)}'."
+            );
+        }
+
+        Is2faEnabled = user.TwoFactorEnabled;
+        HasAuthenticator = await UserManager.GetAuthenticatorKeyAsync(
+            user
+        ) != null;
+        RecoveryCodesLeft = await UserManager.CountRecoveryCodesAsync(
+            user
+        );
+    }
+}
+
+<h4 id="two-factor-header">@ViewData["Title"]</h4>
+@if (Is2faEnabled)
+{
+    if (RecoveryCodesLeft == 0)
+    {
+        <div class="alert alert-danger">
+            <strong>You have no recovery codes left.</strong>
+            <p>You must <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a> before you can log in with a recovery code.</p>
+        </div>
+    }
+    else if (RecoveryCodesLeft == 1)
+    {
+        <div class="alert alert-danger">
+            <strong>You have 1 recovery code left.</strong>
+            <p>You can <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
+        </div>
+    }
+    else if (RecoveryCodesLeft <= 3)
+    {
+        <div class="alert alert-warning">
+            <strong>You have @RecoveryCodesLeft recovery codes left.</strong>
+            <p>You should <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a>.</p>
+        </div>
+    }
+
+    <a asp-page="./Disable2fa" class="btn btn-default">Disable 2FA</a>
+    <a asp-page="./GenerateRecoveryCodes" class="btn btn-default">Reset recovery codes</a>
+}
+
+<h5 id="two-factor-sub-header">Authenticator app</h5>
+@if (!HasAuthenticator)
+{
+    <a id="add-two-factor-app" asp-page="./EnableAuthenticator" class="btn btn-default">Add authenticator app</a>
+}
+else
+{
+    <a asp-page="./EnableAuthenticator" class="btn btn-default">Configure authenticator app</a>
+    <a asp-page="./ResetAuthenticator" class="btn btn-default">Reset authenticator key</a>
+}
+
+@section Scripts {
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+}

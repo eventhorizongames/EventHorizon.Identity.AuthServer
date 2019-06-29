@@ -1,0 +1,159 @@
+@page
+@using EventHorizon.Identity.AuthServer.Account.Models;
+@model IndexModel;
+
+@functions {
+    public class IndexModel : PageModel 
+    {
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IIdentityServerInteractionService _interaction;
+        private readonly IEventService _events;
+
+        public IndexModel(
+            SignInManager<ApplicationUser> signInManager,
+            IIdentityServerInteractionService interaction,
+            IEventService events
+        )
+        {
+            _signInManager = signInManager;
+            _interaction = interaction;
+            _events = events;
+        }
+
+
+        public string LogoutId { get; set; }
+        public bool ShowLogoutPrompt { get; set; } = true;
+
+        
+        public async Task<IActionResult> OnGet()
+        {
+            // build a model so the logout page knows what to display
+            await BuildLogoutViewModelAsync();
+
+            if (ShowLogoutPrompt == false)
+            {
+                // if the request for logout was properly authenticated from IdentityServer, then
+                // we don't need to show the prompt and can just log the user out directly.
+                return await OnPost();
+            }
+
+            return Page();
+        }
+
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPost()
+        {
+            // build a model so the logged out page knows what to display
+            var loggedOutViewModel = await BuildLoggedOutViewModelAsync();
+
+            if (User?.Identity.IsAuthenticated == true)
+            {
+                // Used to delete all local auth cookies
+                await _signInManager.SignOutAsync();
+
+                // raise the logout event
+                await _events.RaiseAsync(new UserLogoutSuccessEvent(
+                    User.GetSubjectId(), 
+                    User.GetDisplayName()
+                ));
+            }
+
+            // check if we need to trigger sign-out at an upstream identity provider
+            if (loggedOutViewModel.TriggerExternalSignout)
+            {
+                // build a return URL so the upstream provider will redirect back
+                // to us after the user has logged out. this allows us to then
+                // complete our single sign-out processing.
+                string url = Url.Page("./Logout", new { 
+                    logoutId = loggedOutViewModel.LogoutId 
+                });
+
+                // this triggers a redirect to the external provider for sign-out
+                return SignOut(new AuthenticationProperties { 
+                    RedirectUri = url 
+                }, loggedOutViewModel.ExternalAuthenticationScheme);
+            }
+
+            return RedirectToPage("./LoggedOut", loggedOutViewModel);
+        }
+        private async Task BuildLogoutViewModelAsync()
+        {
+            ShowLogoutPrompt = AccountOptions.ShowLogoutPrompt;
+
+            if (User?.Identity.IsAuthenticated != true)
+            {
+                // if the user is not authenticated, then just show logged out page
+                ShowLogoutPrompt = false;
+                return;
+            }
+
+            var context = await _interaction.GetLogoutContextAsync(LogoutId);
+            if (context?.ShowSignoutPrompt == false)
+            {
+                // it's safe to automatically sign-out
+                ShowLogoutPrompt = false;
+                return;
+            }
+
+            // show the logout prompt. this prevents attacks where the user
+            // is automatically signed out by another malicious web page.
+        }
+        private async Task<LoggedOutViewModel> BuildLoggedOutViewModelAsync()
+        {
+            // get context information (client name, post logout redirect URI and iframe for federated signout)
+            var logout = await _interaction.GetLogoutContextAsync(LogoutId);
+
+            var vm = new LoggedOutViewModel
+            {
+                AutomaticRedirectAfterSignOut = AccountOptions.AutomaticRedirectAfterSignOut,
+                PostLogoutRedirectUri = logout?.PostLogoutRedirectUri,
+                ClientName = string.IsNullOrEmpty(logout?.ClientName) ? logout?.ClientId : logout?.ClientName,
+                SignOutIframeUrl = logout?.SignOutIFrameUrl,
+                LogoutId = LogoutId
+            };
+
+            if (User?.Identity.IsAuthenticated == true)
+            {
+                var idp = User.FindFirst(JwtClaimTypes.IdentityProvider)?.Value;
+                if (idp != null && idp != IdentityServer4.IdentityServerConstants.LocalIdentityProvider)
+                {
+                    var providerSupportsSignout = await HttpContext.GetSchemeSupportsSignOutAsync(idp);
+                    if (providerSupportsSignout)
+                    {
+                        if (vm.LogoutId == null)
+                        {
+                            // if there's no current logout context, we need to create one
+                            // this captures necessary info from the current logged in user
+                            // before we signout and redirect away to the external IdP for signout
+                            vm.LogoutId = await _interaction.CreateLogoutContextAsync();
+                        }
+
+                        vm.ExternalAuthenticationScheme = idp;
+                    }
+                }
+            }
+
+            return vm;
+        }
+    }
+}
+
+<div class="logout-page">
+    <div class="page-header">
+        <h1>Logout</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-6">
+            <p>Would you like to logout of EventHorizon Games Studio Identity?</p>
+            <form asp-page="./Logout">
+                <input type="hidden" name="logoutId" value="@Model.LogoutId"  />
+                <fieldset>
+                    <div class="form-group">
+                        <button id="logout-confirm-button" class="btn btn-primary">Yes</button>
+                    </div>
+                </fieldset>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,24 @@
+﻿@page
+@model EventHorizon.Identity.AuthServer.Resource.IndexModel
+@{
+}
+
+<div>
+    <h3>Api Resource</h3>
+@if (Model.Resources.Any())
+{
+    <ul>
+    @foreach (var apiResource in Model.Resources)
+    {
+        <li>
+            <form method="POST" asp-route-id="@apiResource.Name" asp-page="./Remove/Index">
+                @(apiResource.Name + " (" + apiResource.DisplayName + ")")
+                <a asp-page="./Edit/Index" asp-route-id="@apiResource.Name">Edit</a>
+                <button class="btn btn-link" type="submit">Remove</button>
+            </form>
+        </li>
+    }
+    </ul>
+}
+    <a asp-page="./Create/Index" >Create</a>
+</div>

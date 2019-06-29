@@ -1,0 +1,17 @@
+﻿@page
+@model EventHorizon.Identity.AuthServer.Clients.Create.IndexModel
+@{
+}
+
+<form method="POST" asp-page="./Index">
+    <div asp-validation-summary="All"></div>
+    <div class="form-group">
+        <label asp-for="Client.Id">New Client Id</label>
+        <input asp-for="Client.Id" class="form-control" placeholder="New Client Id" />                    
+    </div>
+    <div class="form-group">
+        <label asp-for="Client.Name">New Client Name</label>
+        <input asp-for="Client.Name" class="form-control" placeholder="New Client Name" />                    
+    </div>
+    <button id="create-client" class="btn btn-default" type="submit">Create</button>
+</form>

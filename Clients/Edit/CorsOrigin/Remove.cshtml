@@ -1,0 +1,25 @@
+@page "/Clients/{clientId}/Remove/CorsOrigin/{id:int}"
+@using EventHorizon.Identity.AuthServer.Configuration;
+
+@inject HistoryExtendedConfigurationDbContext _configurationDbContext;
+
+@functions {
+    public async Task<IActionResult> OnPost(
+        string clientId,
+        int id
+    )
+    {
+        var corsOrigin = _configurationDbContext.ClientCorsOrigins
+            .FirstOrDefault(
+                a => a.Client.ClientId == clientId 
+                    && a.Id == id
+            );
+        if (corsOrigin != null)
+        {
+            _configurationDbContext.ClientCorsOrigins.Remove(corsOrigin);
+            await _configurationDbContext.SaveChangesAsync();
+        }
+
+        return RedirectToPage("../Index", new { Id = clientId });
+    }
+}

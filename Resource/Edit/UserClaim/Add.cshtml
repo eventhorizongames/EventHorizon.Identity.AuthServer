@@ -1,0 +1,46 @@
+@page "/Resource/{resourceId}/Add/UserClaim"
+@using EventHorizon.Identity.AuthServer.Clients.Models;
+@using EventHorizon.Identity.AuthServer.Configuration;
+@using IdentityServer4.EntityFramework.Entities;
+@using Microsoft.EntityFrameworkCore;
+
+@inject HistoryExtendedConfigurationDbContext _configurationDbContext;
+
+@functions {
+    [BindProperty]
+    public string Type { get; set; }
+
+    public async Task<IActionResult> OnPost(
+        string resourceId
+    )
+    {
+        var apiResource = _configurationDbContext.ApiResources
+            .Include(
+                "UserClaims"
+            ).FirstOrDefault(
+                a => a.Name == resourceId
+            );
+        if (apiResource.UserClaims
+            .FirstOrDefault(
+                a => a.Type == Type
+            ) == null
+        )
+        {
+            apiResource.UserClaims.Add(new ApiResourceClaim
+            {
+                Type = Type,
+            });
+            _configurationDbContext.Update(
+                apiResource
+            );
+            await _configurationDbContext.SaveChangesAsync();
+        }
+
+        return RedirectToPage(
+            "../Index", 
+            new { 
+                Id = resourceId 
+            }
+        );
+    }
+}

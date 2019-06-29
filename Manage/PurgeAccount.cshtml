@@ -1,0 +1,73 @@
+@page
+@model IndexModel;
+
+@using MediatR;
+@using EventHorizon.Identity.AuthServer.Identity;
+@using EventHorizon.Identity.AuthServer.Services.User;
+
+@{
+    ViewData["Title"] = "Purge Account";
+    ViewData.AddActivePage(ManageNavPages.PurgeAccount);
+}
+
+@functions {
+    [SecurityHeaders]
+    public class IndexModel : PageModel 
+    {
+        readonly IMediator _mediator;
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly SignInManager<ApplicationUser> _signInManager;
+
+        public IndexModel(
+            IMediator mediator,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager
+        )
+        {
+            _mediator = mediator;
+            _userManager = userManager;
+            _signInManager = signInManager;
+        }
+
+        [BindProperty]
+        public string Button { get; set; }
+
+        public async Task<IActionResult> OnPost()
+        {
+            if (Button == "confirm") {
+                // Purge account
+                await _mediator.Send(
+                    new PurgeUserAccount(
+                        await _userManager.GetUserAsync(
+                            User
+                        )
+                    )
+                );
+                await _signInManager.SignOutAsync();
+                return RedirectToPage(
+                    "/"
+                );
+            }
+            return RedirectToPage(
+                "./Index"
+            );
+        }
+    }
+}
+
+<div class="page-consent">
+    <div class="row">
+        <div class="col-sm-8">
+            <form id="purge-account-form" asp-page="./PurgeAccount" method="POST">
+
+                <div class="consent-page-description">Are you sure you want to purge your account?</div>
+                <div class="alert alert-danger" role="alert">This action cannot be undone.</div>
+
+                <div class="consent-buttons">
+                    <button id="confirm" name="button" value="confirm" class="btn btn-danger" autofocus>Confirm</button>
+                    <button id="cancel" name="button" value="cancel" class="btn">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

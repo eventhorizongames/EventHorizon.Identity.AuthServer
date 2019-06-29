@@ -1,0 +1,146 @@
+﻿@page
+@model IndexModel;
+
+@using IdentityServer4.Stores;
+@using IdentityServer4.Services;
+@using EventHorizon.Identity.AuthServer.Grants.Models;
+
+@functions {
+    [SecurityHeaders]
+    public class IndexModel : PageModel 
+    {
+        readonly IIdentityServerInteractionService _interaction;
+        readonly IClientStore _clients;
+        readonly IResourceStore _resources;
+
+        public IndexModel(
+            IIdentityServerInteractionService interaction,
+            IClientStore clients,
+            IResourceStore resources
+        )
+        {
+            _interaction = interaction;
+            _clients = clients;
+            _resources = resources;
+        }
+
+        public IEnumerable<GrantViewModel> Grants { get; private set; }
+
+        public async Task OnGet() 
+        {
+            var grants = await _interaction.GetAllUserConsentsAsync();
+
+            var list = new List<GrantViewModel>();
+            foreach (var grant in grants)
+            {
+                var client = await _clients.FindClientByIdAsync(
+                    grant.ClientId
+                );
+                if (client != null)
+                {
+                    var resources = await _resources.FindResourcesByScopeAsync(
+                        grant.Scopes
+                    );
+
+                    var item = new GrantViewModel()
+                    {
+                        ClientId = client.ClientId,
+                        ClientName = client.ClientName ?? client.ClientId,
+                        ClientLogoUrl = client.LogoUri,
+                        ClientUrl = client.ClientUri,
+                        Created = grant.CreationTime,
+                        Expires = grant.Expiration,
+                        IdentityGrantNames = resources.IdentityResources
+                            .Select(
+                                x => x.DisplayName ?? x.Name
+                            ).ToArray(),
+                        ApiGrantNames = resources.ApiResources
+                            .Select(
+                                x => x.DisplayName ?? x.Name
+                            ).ToArray()
+                    };
+
+                    list.Add(
+                        item
+                    );
+                }
+            }
+
+            Grants = list;
+        }
+    }
+}
+<div class="grants">
+    <div class="row page-header">
+        <div class="col-sm-10">
+            <a asp-page="../Manage/Index">< Back to Profile</a>
+            <h1 id="page-title">
+                Client Application Access
+            </h1>
+            <div id="grants-page-description">
+                Below is the list of applications you have given access to and the names of the resources they have access to.
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Grants.Any() == false) 
+    {
+        <div class="row">
+            <div class="col-sm-8">
+                <div class="alert alert-info">
+                    You have not given access to any applications
+                </div>
+            </div>
+        </div>
+    } 
+    else 
+    { 
+        foreach (var grant in Model.Grants) 
+        {
+            @await Html.PartialAsync("_GrantListItem", grant)
+        } 
+    }
+</div>
+
+@section Styles {
+    <style>
+        .grants .page-header {
+            margin-bottom: 10px;
+        }
+        .grants .grant {
+            margin-top: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid lightgray;
+        }
+        .grants .grant img {
+            width: 100px;
+            height: 100px;
+        }
+        .grants .grant .clientname {
+            font-size: 140%;
+            font-weight: bold;
+        }
+        .grants .grant .granttype .grant-label {
+            font-size: 120%;
+            font-weight: bold;
+        }
+        .grants .grant .created .grant-label {
+            font-size: 120%;
+            font-weight: bold;
+        }
+        .grants .grant .expires .grant-label {
+            font-size: 120%;
+            font-weight: bold;
+        }
+        .grants .grant li {
+            list-style-type: none;
+            display: inline;
+        }
+        .grants .grant li:after {
+            content: ', ';
+        }
+        .grants .grant li:last-child:after {
+            content: '';
+        }
+    </style>
+}

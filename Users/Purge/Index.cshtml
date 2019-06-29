@@ -1,0 +1,99 @@
+﻿@page "{id}"
+@model IndexModel
+
+@using MediatR;
+@using Microsoft.AspNetCore.Identity;
+@using EventHorizon.Identity.AuthServer.Models;
+@using EventHorizon.Identity.AuthServer.Users.Models;
+@using EventHorizon.Identity.AuthServer.Users.Services.Fetch;
+@using EventHorizon.Identity.AuthServer.Services.User;
+
+@functions {
+    public class IndexModel : PageModel 
+    {
+    
+        readonly IMediator _mediator;
+        readonly UserManager<ApplicationUser> _userManager;
+
+        public IndexModel(
+            IMediator mediator,
+            UserManager<ApplicationUser> userManager
+        )
+        {
+            _mediator = mediator;
+            _userManager = userManager;
+        }
+
+        [BindProperty]
+        public string Button { get; set; }
+        public UserDisplayModel DisplayUser { get; private set; }
+
+        public async Task OnGet(
+            string id
+        )
+        {
+            DisplayUser = (await _mediator.Send(
+                    new QueryForListOfUsers()
+                )).Where(
+                    user => user.Id == id
+                ).Select(user =>
+                    new UserDisplayModel
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        Email = user.Email
+                    }
+                ).FirstOrDefault();
+        }
+        public async Task<IActionResult> OnPost(
+            string id
+        ) {
+            if (Button == "confirm") {
+                // Purge account
+                await _mediator.Send(
+                    new PurgeUserAccount(
+                        await _userManager.FindByIdAsync(
+                            id
+                        )
+                    )
+                );
+            }
+            
+            return RedirectToPage("../Index");
+        }
+    }
+}
+
+<div class="user">
+    <h3>Purge User</h3>
+    <div class="back" >
+        <a asp-page="../Index">< Back to User List</a>
+    </div>
+@if(Model.DisplayUser == null) 
+{
+    <div>User not Found.</div>
+}
+@if (Model.DisplayUser != null)
+{
+    <form id="purge-account-form" asp-page="./Index" method="POST">
+        <div class="alert alert-danger" role="alert">This action cannot be undone.</div>
+
+        <div><strong>Email: </strong> @Model.DisplayUser.Email</div>
+        <div class="consent-page-description">Are you sure you want to purge your account?</div>
+
+        <div class="consent-buttons">
+            <button id="confirm" name="button" value="confirm" class="btn btn-danger" autofocus>Confirm</button>
+            <button id="cancel" name="button" value="cancel" class="btn">Cancel</button>
+        </div>
+    </form>
+}
+</div>
+
+<style>
+    .user .back {
+        padding: 0em 0em 1em 0em;
+    }
+    .user .bold {
+        font-weight: bold;
+    }
+</style>

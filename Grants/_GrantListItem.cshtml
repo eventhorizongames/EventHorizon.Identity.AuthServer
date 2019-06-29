@@ -1,0 +1,53 @@
+@model GrantViewModel
+@using EventHorizon.Identity.AuthServer.Grants.Models;
+
+<div class="row grant" data-client-id="@Model.ClientId">
+    <div class="col-sm-2">
+        @if (Model.ClientLogoUrl != null) 
+        {
+            <img class="client-logo" src="@Model.ClientLogoUrl" />
+        }
+    </div>
+    <div class="col-sm-8">
+        <div class="clientname">@Model.ClientName</div>
+        <div class="created">
+            <span class="grant-label">Created:</span>
+            @Model.Created.ToString("yyyy-MM-dd")
+        </div>
+        @if (Model.Expires.HasValue) 
+        {
+            <div class="expires">
+                <span class="grant-label">Expires:</span>
+                @Model.Expires.Value.ToString("yyyy-MM-dd")
+            </div>
+        } 
+        @if (Model.IdentityGrantNames.Any()) 
+        {
+            <div class="granttype granttype-identity">
+                <div class="grant-label">Identity Grants</div>
+                <ul>
+                    @foreach (var name in Model.IdentityGrantNames) {
+                        <li>@name</li>
+                    }
+                </ul>
+            </div>
+        } 
+        @if (Model.ApiGrantNames.Any()) 
+        {
+            <div class="granttype granttype-api">
+                <div class="grant-label">API Grants</div>
+                <ul>
+                    @foreach (var name in Model.ApiGrantNames) {
+                        <li>@name</li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+    <div class="col-sm-2">
+        <form class="client-revoke" asp-page="./Revoke" method="POST">
+            <input type="hidden" name="clientId" value="@Model.ClientId" />
+            <button class="btn btn-danger">Revoke Access</button>
+        </form>
+    </div>
+</div>

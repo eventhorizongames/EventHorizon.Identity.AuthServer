@@ -1,0 +1,22 @@
+@page "/Resource/{id}/Remove"
+@using EventHorizon.Identity.AuthServer.Configuration;
+
+@inject HistoryExtendedConfigurationDbContext _configurationDbContext;
+
+@functions {
+    public IActionResult OnPost(
+        string id
+    ) {
+
+        _configurationDbContext.ApiResources.Remove(
+            _configurationDbContext.ApiResources
+                .FirstOrDefault(
+                    a => a.Name == id
+                )
+        );
+        _configurationDbContext.SaveChanges();
+        return RedirectToPage(
+            "../Index"
+        );
+    }
+}

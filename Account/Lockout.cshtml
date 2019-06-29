@@ -1,0 +1,20 @@
+@page
+@model LockoutModel;
+
+@{
+    ViewData["Title"] = "Locked out";
+}
+
+@functions {
+    public class LockoutModel : PageModel 
+    {
+        public void OnGet()
+        {
+        }
+    }
+}
+
+<header>
+    <h2 class="text-danger">@ViewData["Title"]</h2>
+    <p class="text-danger">This account has been locked out, please try again later.</p>
+</header>

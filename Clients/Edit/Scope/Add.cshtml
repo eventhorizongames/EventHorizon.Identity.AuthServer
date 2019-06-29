@@ -1,0 +1,32 @@
+@page "/Clients/{clientId}/Add/Scope"
+@using EventHorizon.Identity.AuthServer.Clients.Models;
+@using EventHorizon.Identity.AuthServer.Configuration;
+@using IdentityServer4.EntityFramework.Entities;
+
+@inject HistoryExtendedConfigurationDbContext _configurationDbContext;
+
+@functions {
+    [BindProperty]
+    public AddScopeModel AddModel { get; set; }
+
+    public async Task<IActionResult> OnPost(
+        string clientId
+    )
+    {
+        var scopeCount = _configurationDbContext.ClientScopes
+            .Where(
+                a => a.Client.ClientId == clientId && a.Scope == AddModel.Scope
+            ).Count();
+        if (scopeCount == 0)
+        {
+            await _configurationDbContext.ClientScopes.AddAsync(new ClientScope
+            {
+                Client = _configurationDbContext.Clients.First(a => a.ClientId == clientId),
+                Scope = AddModel.Scope,
+            });
+            await _configurationDbContext.SaveChangesAsync();
+        }
+
+        return RedirectToPage("../Index", new { Id = clientId });
+    }
+}

@@ -5,7 +5,15 @@ namespace EventHorizon.Identity.AuthServer.Services.User
 {
     public struct UserSetProfileClaimsEvent : INotification
     {
-        public ApplicationUser User { get; internal set; }
-        public ApplicationUserProfile Profile { get; internal set; }
+        public ApplicationUser User { get; }
+        public ApplicationUserProfile Profile { get; }
+        public UserSetProfileClaimsEvent(
+            ApplicationUser user,
+            ApplicationUserProfile profile
+        )
+        {
+            this.User = user;
+            this.Profile = profile;
+        }
     }
 }

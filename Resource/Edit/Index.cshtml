@@ -1,0 +1,74 @@
+﻿@page "{id}"
+@model EventHorizon.Identity.AuthServer.Resource.Edit.IndexModel
+
+@using Microsoft.AspNetCore.Http.Extensions
+@using EventHorizon.Identity.AuthServer.Resource.Models;
+@using IdentityServer4
+@using IdentityServer4.Models
+
+@{
+}
+
+<div class="container">
+    <a asp-page="../Index">< Back to Resource List</a>
+    <h3>@Model.Entity.DisplayName (@Model.Entity.Name)</h3>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Details</h3>
+            <form method="post">
+                <div asp-validation-summary="All" class="text-danger"></div>
+                <input type="hidden" asp-for="Name" />
+                <div class="form-group">
+                    <label asp-for="DisplayName"></label>
+                    <input asp-for="DisplayName" class="form-control" placeholder="@Model.Entity.DisplayName" />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Description"></label>
+                    <input asp-for="Description" class="form-control" placeholder="@Model.Entity.Description" />
+                </div>
+                <button type="submit" class="btn btn-default">Save</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+            <h3>Scopes</h3>
+            @foreach (var scope in Model.Entity.Scopes)
+            {
+            <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-route-id="@scope.Id" asp-page="./Scope/Remove">
+                <div>@scope.DisplayName (@scope.Name) <button class="btn btn-link" type="submit">Remove</button></div>
+            </form>
+            }
+            <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-page="./Scope/Add">
+                <div class="form-group">
+                    <label for="Name">Name</label>
+                    <input name="Name" class="form-control" placeholder="Name" />
+                </div>
+                <div class="form-group">
+                    <label for="DisplayName">Display Name</label>
+                    <input name="DisplayName" class="form-control" placeholder="Display Name" />
+                </div>
+                <button class="btn btn-default" type="submit">Add</button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <h3>User Claims</h3>
+            @foreach (var userClaim in Model.Entity.UserClaims)
+            {
+            <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-route-id="@userClaim.Id" asp-page="./UserClaim/Remove">
+                <div>@userClaim.Type <button class="btn btn-link" type="submit">Remove</button></div>
+            </form>
+            }
+            <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-page="./UserClaim/Add">
+                <div class="form-group">
+                    <label for="Type">Type</label>
+                    <input name="Type" class="form-control" placeholder="Type" />
+                </div>
+                <button class="btn btn-default" type="submit">Add</button>
+            </form>
+        </div>
+        <div class="col-md-6">
+        </div>
+    </div>
+    <div style="height: 250px"></div>
+</div>

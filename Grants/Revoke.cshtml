@@ -1,0 +1,44 @@
+﻿@page
+@model RevokeModel;
+
+@using IdentityServer4.Events;
+@using IdentityServer4.Extensions;
+@using IdentityServer4.Services;
+
+@functions {
+    [SecurityHeaders]
+    public class RevokeModel : PageModel 
+    {
+        readonly IIdentityServerInteractionService _interaction;
+        readonly IEventService _events;
+
+        public RevokeModel(
+            IIdentityServerInteractionService interaction,
+            IEventService events
+        )
+        {
+            _interaction = interaction;
+            _events = events;
+        }
+        
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPost(
+            string clientId
+        ) 
+        {
+            await _interaction.RevokeUserConsentAsync(
+                clientId
+            );
+            await _events.RaiseAsync(
+                new GrantsRevokedEvent(
+                    User.GetSubjectId(), 
+                    clientId
+                )
+            );
+
+            return RedirectToPage(
+                "./Index"
+            );
+        }
+    }
+}

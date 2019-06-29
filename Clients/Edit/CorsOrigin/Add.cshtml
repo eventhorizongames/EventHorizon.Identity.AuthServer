@@ -1,0 +1,33 @@
+@page "/Clients/{clientId}/Add/CorsOrigin"
+@using EventHorizon.Identity.AuthServer.Clients.Models;
+@using EventHorizon.Identity.AuthServer.Configuration;
+@using IdentityServer4.EntityFramework.Entities;
+
+@inject HistoryExtendedConfigurationDbContext _configurationDbContext;
+
+@functions {
+    [BindProperty]
+    public AddAllowedCorsOriginModel AddModel { get; set; }
+
+    public async Task<IActionResult> OnPost(
+        string clientId
+    )
+    {
+        var corsOriginCount = _configurationDbContext.ClientCorsOrigins
+            .Where(
+                a => a.Client.ClientId == clientId 
+                    && a.Origin == AddModel.CorsOrigin
+            ).Count();
+        if (corsOriginCount == 0)
+        {
+            await _configurationDbContext.ClientCorsOrigins.AddAsync(new ClientCorsOrigin
+            {
+                Client = _configurationDbContext.Clients.First(a => a.ClientId == clientId),
+                Origin = AddModel.CorsOrigin,
+            });
+            await _configurationDbContext.SaveChangesAsync();
+        }
+
+        return RedirectToPage("../Index", new { Id = clientId });
+    }
+}

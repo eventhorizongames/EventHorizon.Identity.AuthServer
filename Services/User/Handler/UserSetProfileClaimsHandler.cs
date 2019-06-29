@@ -3,7 +3,6 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading;
 using System.Threading.Tasks;
-using EventHorizon.Identity.AuthServer.Manage.Models;
 using EventHorizon.Identity.AuthServer.Models;
 using IdentityModel;
 using MediatR;

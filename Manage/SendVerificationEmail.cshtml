@@ -1,0 +1,66 @@
+@page
+@model IndexModel;
+@using Microsoft.AspNetCore.Identity;
+@using EventHorizon.Identity.AuthServer.Models;
+@using EventHorizon.Identity.AuthServer.Services;
+
+
+@functions {
+    public class IndexModel : PageModel {
+        readonly UserManager<ApplicationUser> _userManager;
+        readonly IEmailSender _emailSender;
+
+        public IndexModel(
+            UserManager<ApplicationUser> userManager,
+            IEmailSender emailSender
+        ) {
+            _userManager = userManager; 
+            _emailSender = emailSender;  
+        }
+
+        [TempData]
+        public string StatusMessage { get; set; }
+        
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> OnPost() 
+        {
+            if (!ModelState.IsValid)
+            {
+                return RedirectToPage(
+                    "./Index"
+                );
+            }
+
+            var user = await _userManager.GetUserAsync(
+                User
+            );
+            if (user == null)
+            {
+                throw new ApplicationException(
+                    $"Unable to load user with ID '{_userManager.GetUserId(User)}'."
+                );
+            }
+
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(
+                user
+            );
+            var callbackUrl = Url.EmailConfirmationLink(
+                user.Id, 
+                code, 
+                Request.Scheme
+            );
+            var email = user.Email;
+            await _emailSender.SendEmailConfirmationAsync(
+                email, 
+                callbackUrl
+            );
+
+            StatusMessage = "Verification email sent. Please check your email.";
+            return RedirectToPage(
+                "./Index"
+            );
+        }
+    }
+}
+
+<h2>Verification email sent. Please check your email.</h2>

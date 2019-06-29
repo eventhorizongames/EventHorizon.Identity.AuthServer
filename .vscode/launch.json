@@ -9,7 +9,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.1/EventHorizon.Identity.AuthServer.dll",
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.2/EventHorizon.Identity.AuthServer.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
@@ -29,7 +29,7 @@
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
-                "ASPNETCORE_URLS": "https://localhost:23501",
+                "ASPNETCORE_URLS": "https://localhost:23501;http://localhost:23500",
             },
             "sourceFileMap": {
                 "/Views": "${workspaceFolder}/Views"
@@ -41,7 +41,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.1/EventHorizon.Identity.AuthServer.dll",
+            "program": "${workspaceFolder}/bin/Debug/netcoreapp2.2/EventHorizon.Identity.AuthServer.dll",
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,

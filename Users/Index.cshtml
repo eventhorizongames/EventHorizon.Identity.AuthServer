@@ -1,0 +1,67 @@
+﻿@page
+
+@using System.Collections.Generic;
+@using MediatR;
+@using IdentityModel;
+@using Microsoft.AspNetCore.Authorization;
+@using Microsoft.AspNetCore.Identity;
+@using EventHorizon.Identity.AuthServer.Models;
+@using EventHorizon.Identity.AuthServer.Users.Models;
+@using EventHorizon.Identity.AuthServer.Users.Services.Fetch;
+
+@inject IMediator mediator
+@inject UserManager<ApplicationUser> userManager
+
+@functions {
+    [BindProperty]
+    public int Count { get; set; }
+    [BindProperty]
+    public IList<UserDisplayModel> Users { get; private set; } = new List<UserDisplayModel>();
+
+    public async Task OnGet(
+        [FromQuery] int page = 1,
+        [FromQuery] int take = 25
+    )
+    {
+        Count = userManager.Users.Count();
+        Users = new List<UserDisplayModel>(
+            (await mediator.Send(
+                new QueryForListOfUsers()
+            )).Skip(
+                (page - 1) * take
+            ).Take(
+                take
+            ).Select(user =>
+                new UserDisplayModel
+                {
+                    Id = user.Id,
+                    UserName = user.UserName,
+                    Email = user.Email
+                }
+            )
+        );
+    }
+}
+
+<div class="users">
+    <h3>Users <span class="total-user-count" title="Total System Count of Users">(@Model.Count)</span></h3>
+@if (Model.Users.Any())
+{
+    <ul>
+    @foreach (var user in Model.Users)
+    {
+        <li>
+            @(user.Email)
+            <a asp-route-id="@user.Id" asp-page="./Display/Index">Display</a>
+            <a asp-route-id="@user.Id" asp-page="./Purge/Index">Purge</a>
+        </li>
+    }
+    </ul>
+}
+</div>
+
+<style>
+    .users .total-user-count {
+        cursor: help;
+    }
+</style>

@@ -1,0 +1,51 @@
+ToDo:
+    ☐ Added ViewData["Title"] to missed pages.
+    ☐ Consolidate the Email related services under one namespace
+        - Services
+        - Extensions
+    ✔ Update Resource to Razor Pages @done(19-06-18 07:23)
+        - Views/Resource
+        - Resource
+    ✔ Update User to Razor Pages @done(19-06-19 13:24)
+        - Views/User
+        - Users
+        - Changed Views/User to Users, to help with namespace and Context.User collision.
+    ✔ Update Register to Razor Pages @done(19-06-27 21:09)
+        - Views/Register
+        - Register
+    ✔ Update Manage to Razor Pages @done(19-06-23 01:43)
+        - Views/Manage
+        - Manage
+        - options.Conventions.AuthorizeFolder("/Manage", "Identity Admin");
+    ✔ Update Account to Razor Pages @done(19-06-29 00:54)
+        Since this is now a merge between the Identity and ASP.NET Identity 
+         their is no clear upgrade path other than just doing it manually.
+        So might as well make it consistent across the pages.
+        - Views/Manage
+        - options.Conventions.AuthorizeFolder("/Account", "Identity Admin");
+    ✔ Update Consent to Razor Pages @done(19-06-25 20:18)
+    ✔ Update Debugging to Razor Pages @done(19-06-27 21:09)
+    ✔ Update Diagnostics to Razor Pages @done(19-06-27 21:10)
+    ✔ Update Grants to Razor Pages @done(19-06-27 21:10)
+    ✔ Update Home to Razor Pages @done(19-06-27 21:10)
+        Updated to Index.cshtml
+    ✔ Add Selenium Testing @done(19-06-27 21:10)
+        This has been done for all tests that can be automated.
+    Tests that can only be tested manually:
+        Confirm Email
+        Reset Password
+        Forgot Password
+        Login With 2 Factor
+        Login with Recovery Codes
+        External Login (this is not implemented) 
+            Locale logins are only type of login supported.
+
+Testing:
+    ✔ Make Sure authorization is setup correctly for @done(19-06-28 21:32)
+        ✔ Account @done(19-06-28 21:32)
+    ✔ Account Testing: @done(19-06-29 01:02)
+        ✔ Confirm Email @done(19-06-28 21:32)
+        ✔ Reset Password @done(19-06-29 00:53)
+        ✔ Forgot Password @done(19-06-29 00:53)
+        ✔ Login with 2 Factor @done(19-06-29 01:02)
+        ✔ Login With Recovery Code @done(19-06-29 01:02)

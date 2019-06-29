@@ -1,0 +1,22 @@
+@page "/Clients/{clientId}/Remove/Scope/{id:int}"
+@using EventHorizon.Identity.AuthServer.Configuration;
+
+@inject HistoryExtendedConfigurationDbContext _configurationDbContext;
+
+@functions {
+    public async Task<IActionResult> OnPost(
+        string clientId,
+        int id
+    )
+    {
+        var scope = _configurationDbContext.ClientScopes
+            .FirstOrDefault(a => a.Client.ClientId == clientId && a.Id == id);
+        if (scope != null)
+        {
+            _configurationDbContext.ClientScopes.Remove(scope);
+            await _configurationDbContext.SaveChangesAsync();
+        }
+
+        return RedirectToPage("../Index", new { Id = clientId });
+    }
+}
