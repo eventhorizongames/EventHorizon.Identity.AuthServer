@@ -1,19 +1,24 @@
 @page
 @model IndexModel;
+
+@using MediatR;
 @using Microsoft.AspNetCore.Identity;
 @using EventHorizon.Identity.AuthServer.Models;
 @using EventHorizon.Identity.AuthServer.Services;
-
+@using EventHorizon.Identity.AuthServer.Email.Send;
 
 @functions {
     public class IndexModel : PageModel {
+        readonly IMediator _mediator;
         readonly UserManager<ApplicationUser> _userManager;
         readonly IEmailSender _emailSender;
 
         public IndexModel(
+            IMediator mediator,
             UserManager<ApplicationUser> userManager,
             IEmailSender emailSender
         ) {
+            _mediator = mediator;
             _userManager = userManager; 
             _emailSender = emailSender;  
         }
@@ -44,15 +49,15 @@
             var code = await _userManager.GenerateEmailConfirmationTokenAsync(
                 user
             );
-            var callbackUrl = Url.EmailConfirmationLink(
-                user.Id, 
-                code, 
-                Request.Scheme
-            );
-            var email = user.Email;
-            await _emailSender.SendEmailConfirmationAsync(
-                email, 
-                callbackUrl
+            await _mediator.Send(
+                new SendConfirmationEmail(
+                    user.Email,
+                    Url.EmailConfirmationLink(
+                        user.Id, 
+                        code, 
+                        Request.Scheme
+                    )
+                )
             );
 
             StatusMessage = "Verification email sent. Please check your email.";

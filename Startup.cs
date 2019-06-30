@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using EventHorizon.Identity.AuthServer.Application;
 using EventHorizon.Identity.AuthServer.Configuration;
+using EventHorizon.Identity.AuthServer.Email.Api;
+using EventHorizon.Identity.AuthServer.Email.State;
 using EventHorizon.Identity.AuthServer.Models;
 using EventHorizon.Identity.AuthServer.Services;
 using EventHorizon.Identity.AuthServer.Services.Claims;
@@ -24,14 +26,14 @@ namespace EventHorizon.Identity.AuthServer
 {
     public class Startup
     {
-        public IConfiguration Configuration { get; }
-        public IHostingEnvironment Environment { get; }
-
-        public Startup(IConfiguration config, IHostingEnvironment env)
+        public Startup(IConfiguration configuration, IHostingEnvironment environment) 
         {
-            Configuration = config;
-            Environment = env;
+            this.Configuration = configuration;
+                this.Environment = environment;
+               
         }
+                public IConfiguration Configuration { get; }
+        public IHostingEnvironment Environment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
@@ -193,6 +195,7 @@ namespace EventHorizon.Identity.AuthServer
             {
                 services.AddScoped<IEmailSender, EmailSender>();
             }
+            services.AddSingleton<EmailTemplateRepository, InMemoryEmailTemplateRepository>();
             services.Configure<AuthMessageSenderOptions>(
                 Configuration.GetSection("Email")
             );
@@ -200,6 +203,7 @@ namespace EventHorizon.Identity.AuthServer
 
         public void Configure(IApplicationBuilder app)
         {
+            app.AddEmailExtensions();
             app.UseForwardedHeaders();
             if (Environment.IsDevelopment())
             {

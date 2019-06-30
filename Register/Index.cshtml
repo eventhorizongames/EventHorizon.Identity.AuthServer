@@ -5,6 +5,7 @@
 @using EventHorizon.Identity.AuthServer.Services;
 @using EventHorizon.Identity.AuthServer.Services.User;
 @using EventHorizon.Identity.AuthServer.Register.Models;
+@using EventHorizon.Identity.AuthServer.Email.Send;
 
 @{
     ViewData["Title"] = "Register";
@@ -74,8 +75,16 @@
                 _logger.LogInformation("User created a new account with password.");
 
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var callbackUrl = Url.EmailConfirmationLink(user.Id, code, Request.Scheme);
-                await _emailSender.SendEmailConfirmationAsync(UserRegistration.Email, callbackUrl);
+                await _mediator.Send(
+                    new SendConfirmationEmail(
+                        user.Email,
+                        Url.EmailConfirmationLink(
+                            user.Id, 
+                            code, 
+                            Request.Scheme
+                        )
+                    )
+                );
 
                 await _signInManager.SignInAsync(user, isPersistent: false);
                 _logger.LogInformation("User created a new account with password.");

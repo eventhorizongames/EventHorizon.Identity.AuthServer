@@ -1,0 +1,69 @@
+<style>
+    body {
+        background: gray;
+    }
+    #email {
+        max-width: 350px;
+        margin: auto;
+    }
+    #footer {
+        text-align: center;
+        padding: 0.5em;
+        font-weight: bold;
+        color: white;
+    }
+    #footer a {
+        color: white;
+        text-decoration: none;
+    }
+    #email-body {
+        background: white;
+        padding: 0.5em;
+        text-align: center;
+        border-radius: 0.5em;
+    }
+    #email-body p {
+        text-align: justify;
+    }
+    #link {
+        padding: 0.5em;
+        font-size: 1.3em;
+        background: black;
+        color: white;
+        border-radius: 0.5em;
+        margin-bottom: 2em;
+    }
+    #link a {
+        color: white;
+        text-decoration: none;
+    }
+</style>
+<div id="email">
+    <div id="email-body">
+        <h1>Account Confirmation</h1>
+        <p>
+            We received a request to setup your EventHorizon Games Studio Identity account. If this is correct, please confirm by clicking the button below.
+        </p>
+
+        <div id="link">
+            <a
+                href="[[CONFIRMATION_LINK]]"
+                title="Click here to confirm your email account."
+            >
+                Confirm Email
+            </a>
+        </div>
+        <hr />
+        <p style="font-size: .8em">
+            Once you confirm, all account related communication will be sent to this email address.
+        </p>
+    </div>
+    <div id="footer">
+        <a
+            href="https://ehzgames.studio"
+            title="Click here to see details about EventHorizon Game Studio."
+        >
+            EventHorizon Games Studio
+        </a>
+    </div>
+</div>

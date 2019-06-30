@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using EventHorizon.Identity.AuthServer.Email.Api;
 using EventHorizon.Identity.AuthServer.Services.Models;
 using Microsoft.Extensions.Options;
 using SendGrid;
@@ -22,7 +23,7 @@ namespace EventHorizon.Identity.AuthServer.Services
         }
 
         public Task SendEmailAsync(
-            string type, 
+            EmailTypes type, 
             string email, 
             string subject, 
             string message

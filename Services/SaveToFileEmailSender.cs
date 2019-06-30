@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using EventHorizon.Identity.AuthServer.Email.Api;
 using EventHorizon.Identity.AuthServer.Services.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Options;
@@ -28,7 +29,7 @@ namespace EventHorizon.Identity.AuthServer.Services
         }
 
         public Task SendEmailAsync(
-            string type,
+            EmailTypes type,
             string email,
             string subject,
             string message
@@ -36,7 +37,7 @@ namespace EventHorizon.Identity.AuthServer.Services
         {
             var emailFile = JsonConvert.SerializeObject(new
             {
-                type,
+                type = Enum.GetName(type.GetType(), type),
                 from = $"{_authOptions.FromUserName} <{_authOptions.FromUserEmail}>",
                 email,
                 subject,
@@ -60,15 +61,15 @@ namespace EventHorizon.Identity.AuthServer.Services
                 )
             ))
             {
-                fileSystemFile.Write(
-                    emailFile
-                );
-            }
-            return Task.CompletedTask;
-        }
-        private string CreateRandomFileNameWithDate()
-        {
-            return $"Testing_Email-{DateTime.Now.Ticks}.json";
-        }
+        fileSystemFile.Write(
+            emailFile
+        );
     }
+            return Task.CompletedTask;
+    }
+    private string CreateRandomFileNameWithDate()
+    {
+        return $"Testing_Email-{DateTime.Now.Ticks}.json";
+    }
+}
 }
