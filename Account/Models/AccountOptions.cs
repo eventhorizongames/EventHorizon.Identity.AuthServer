@@ -5,6 +5,7 @@ using System;
 
 namespace EventHorizon.Identity.AuthServer.Identity
 {
+    // TODO: Move this into appsettings.json
     public class AccountOptions
     {
         public static bool AllowLocalLogin = true;
@@ -12,7 +13,7 @@ namespace EventHorizon.Identity.AuthServer.Identity
         public static TimeSpan RememberMeLoginDuration = TimeSpan.FromDays(30);
 
         public static bool ShowLogoutPrompt = true;
-        public static bool AutomaticRedirectAfterSignOut = false;
+        public static bool AutomaticRedirectAfterSignOut = true;
 
         // specify the Windows authentication scheme being used
         public static readonly string WindowsAuthenticationSchemeName = Microsoft.AspNetCore.Server.IISIntegration.IISDefaults.AuthenticationScheme;

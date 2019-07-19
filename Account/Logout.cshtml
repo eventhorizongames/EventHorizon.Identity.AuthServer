@@ -20,11 +20,11 @@
             _events = events;
         }
 
-
+        [FromQuery]
         public string LogoutId { get; set; }
+        [FromQuery]
         public bool ShowLogoutPrompt { get; set; } = true;
 
-        
         public async Task<IActionResult> OnGet()
         {
             // build a model so the logout page knows what to display

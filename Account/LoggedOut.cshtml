@@ -10,15 +10,21 @@
 @functions {
     public class LoggedOutViewModel : PageModel
     {
+        [FromQuery]
         public string PostLogoutRedirectUri { get; set; }
+        [FromQuery]
         public string ClientName { get; set; }
+        [FromQuery]
         public string SignOutIframeUrl { get; set; }
 
+        [FromQuery]
         public bool AutomaticRedirectAfterSignOut { get; set; } = false;
 
+        [FromQuery]
         public string LogoutId { get; set; }
-        public bool TriggerExternalSignout => ExternalAuthenticationScheme != null;
+        [FromQuery]
         public string ExternalAuthenticationScheme { get; set; }
+        public bool TriggerExternalSignout => ExternalAuthenticationScheme != null;
     }
 }
 
@@ -41,9 +47,9 @@
         <iframe width="0" height="0" class="signout" src="@Model.SignOutIframeUrl"></iframe>
     }
 </div>
-
 @section scripts
 {
+    
     @if (Model.AutomaticRedirectAfterSignOut)
     {
         <script src="~/js/signout-redirect.js"></script>
