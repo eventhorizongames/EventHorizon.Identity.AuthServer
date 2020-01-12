@@ -21,25 +21,35 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace EventHorizon.Identity.AuthServer
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration, IHostingEnvironment environment) 
+        public Startup(
+            IConfiguration configuration,
+            IHostEnvironment hostEnvironment
+        )
         {
             this.Configuration = configuration;
-                this.Environment = environment;
-               
+            this.HostEnvironment = hostEnvironment;
         }
-                public IConfiguration Configuration { get; }
-        public IHostingEnvironment Environment { get; }
+        public IConfiguration Configuration { get; }
+        public IHostEnvironment HostEnvironment { get; }
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Application Insights
+            services.AddApplicationInsightsTelemetry(
+                options => Configuration.GetSection(
+                    "ApplicationInsights"
+                ).Bind(
+                    options
+                )
+            );
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
-            services.AddMvc()
-                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            services.AddRazorPages()
                 .AddRazorPagesOptions(options =>
                 {
                     options.RootDirectory = "/";
@@ -53,17 +63,13 @@ namespace EventHorizon.Identity.AuthServer
 
                 });
 
-            var isSqlLiteConnectionType = IsSQLLiteConnectionType(Configuration["ConnectionType"]);
+            var isMSSqlConnectionType = IsMSSQLConnectionType(Configuration["ConnectionType"]);
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
             services.AddDbContext<ApplicationDbContext>(options =>
             {
-                if (isSqlLiteConnectionType)
-                {
-                    options.UseSqlite(connectionString);
-                }
-                else if (Environment.IsDevelopment())
+                if (!isMSSqlConnectionType && HostEnvironment.IsDevelopment())
                 {
                     options.UseInMemoryDatabase("development_db");
                 }
@@ -88,13 +94,7 @@ namespace EventHorizon.Identity.AuthServer
                 // this adds the config data from DB (clients, resources, CORS)
                 .AddConfigurationStore<HistoryExtendedConfigurationDbContext>(options =>
                 {
-                    if (isSqlLiteConnectionType)
-                    {
-                        options.ConfigureDbContext = builder =>
-                            builder.UseSqlite(connectionString,
-                                sql => sql.MigrationsAssembly(migrationsAssembly));
-                    }
-                    else if (Environment.IsDevelopment())
+                    if (!isMSSqlConnectionType && HostEnvironment.IsDevelopment())
                     {
                         options.ConfigureDbContext = builder =>
                             builder.UseInMemoryDatabase("development_db");
@@ -109,13 +109,7 @@ namespace EventHorizon.Identity.AuthServer
                 // this adds the operational data from DB (codes, tokens, consents)
                 .AddOperationalStore(options =>
                 {
-                    if (isSqlLiteConnectionType)
-                    {
-                        options.ConfigureDbContext = builder =>
-                            builder.UseSqlite(connectionString,
-                                sql => sql.MigrationsAssembly(migrationsAssembly));
-                    }
-                    else if (Environment.IsDevelopment())
+                    if (!isMSSqlConnectionType && HostEnvironment.IsDevelopment())
                     {
                         options.ConfigureDbContext = builder =>
                             builder.UseInMemoryDatabase("development_db");
@@ -154,7 +148,7 @@ namespace EventHorizon.Identity.AuthServer
                     );
                 }
             });
-            if (Environment.IsDevelopment())
+            if (HostEnvironment.IsDevelopment())
             {
                 identityServer.AddDeveloperSigningCredential();
             }
@@ -187,7 +181,7 @@ namespace EventHorizon.Identity.AuthServer
             });
 
 
-            if (Environment.IsDevelopment())
+            if (HostEnvironment.IsDevelopment())
             {
                 services.AddScoped<IEmailSender, SaveToFileEmailSender>();
             }
@@ -199,22 +193,13 @@ namespace EventHorizon.Identity.AuthServer
             services.Configure<AuthMessageSenderOptions>(
                 Configuration.GetSection("Email")
             );
-
-            // Application Insights
-            services.AddApplicationInsightsTelemetry(
-                options => Configuration.GetSection(
-                    "ApplicationInsights"
-                ).Bind(
-                    options
-                )
-            );
         }
 
         public void Configure(IApplicationBuilder app)
         {
             app.AddEmailExtensions();
             app.UseForwardedHeaders();
-            if (Environment.IsDevelopment())
+            if (HostEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
                 app.UseDatabaseErrorPage();
@@ -227,15 +212,22 @@ namespace EventHorizon.Identity.AuthServer
                 app.ApplicationServices,
                 RunMigrations(
                     Configuration["ConnectionType"],
-                    Environment.IsDevelopment()
+                    HostEnvironment.IsDevelopment()
                 )
             );
 
+            app.UseRouting();
             app.UseCors("default");
             app.UseIdentityServer();
 
             app.UseStaticFiles();
-            app.UseMvcWithDefaultRoute();
+
+            app.UseAuthorization();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapRazorPages();
+                endpoints.MapControllers();
+            });
         }
 
         private static bool RunMigrations(
@@ -243,17 +235,17 @@ namespace EventHorizon.Identity.AuthServer
             bool isDevelopment
         )
         {
-            return IsSQLLiteConnectionType(
+            return IsMSSQLConnectionType(
                 connectionType
             ) || !isDevelopment;
         }
-        private static bool IsSQLLiteConnectionType(
+        private static bool IsMSSQLConnectionType(
             string connectionType
         )
         {
             return !String.IsNullOrEmpty(
                 connectionType
-            ) && "SQLLITE".Equals(
+            ) && "MSSQL".Equals(
                 connectionType
             );
         }

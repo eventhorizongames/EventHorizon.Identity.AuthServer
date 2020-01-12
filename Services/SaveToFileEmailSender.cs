@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using EventHorizon.Identity.AuthServer.Email.Api;
 using EventHorizon.Identity.AuthServer.Services.Models;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using SendGrid;
@@ -17,14 +18,15 @@ namespace EventHorizon.Identity.AuthServer.Services
     // For more details see https://go.microsoft.com/fwlink/?LinkID=532713
     public class SaveToFileEmailSender : IEmailSender
     {
-        readonly AuthMessageSenderOptions _authOptions;
-        readonly IHostingEnvironment _hostingEnvironment;
+        private readonly AuthMessageSenderOptions _authOptions;
+        private readonly IHostEnvironment _hostEnvironment;
+
         public SaveToFileEmailSender(
-            IHostingEnvironment hostingEnvironment,
+            IHostEnvironment hostEnvironment,
             IOptions<AuthMessageSenderOptions> optionsAccessor
         )
         {
-            _hostingEnvironment = hostingEnvironment;
+            _hostEnvironment = hostEnvironment;
             _authOptions = optionsAccessor.Value;
         }
 
@@ -44,7 +46,7 @@ namespace EventHorizon.Identity.AuthServer.Services
                 message
             });
             var directoryPath = Path.Combine(
-                _hostingEnvironment.ContentRootPath,
+                _hostEnvironment.ContentRootPath,
                 "App_Data",
                 "EmailTesting"
             );

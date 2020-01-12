@@ -1,24 +1,21 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using EventHorizon.Identity.AuthServer.Identity;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Hosting;
 
 namespace EventHorizon.Identity.AuthServer.Error
 {
     public class IndexModel : PageModel
     {
         private readonly IIdentityServerInteractionService _interaction;
-        private readonly IHostingEnvironment _environment;
+        private readonly IHostEnvironment _environment;
 
         public IndexModel(
             IIdentityServerInteractionService interaction,
-            IHostingEnvironment environment
+            IHostEnvironment environment
         )
         {
             _interaction = interaction;

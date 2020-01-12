@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using EventHorizon.Identity.AuthServer.Email.Api;
 using MediatR;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 
 namespace EventHorizon.Identity.AuthServer.Email.Load
 {
@@ -12,23 +12,25 @@ namespace EventHorizon.Identity.AuthServer.Email.Load
     {
         public struct LoadPasswordResetEmailTemplateHandler : IRequestHandler<LoadPasswordResetEmailTemplate>
         {
-            readonly IHostingEnvironment _hostingEnvironment;
-            readonly EmailTemplateRepository _repository;
+            private readonly IHostEnvironment _hostEnvironment;
+            private readonly EmailTemplateRepository _repository;
+
             public LoadPasswordResetEmailTemplateHandler(
-                IHostingEnvironment hostingEnvironment,
+                IHostEnvironment hostEnvironment,
                 EmailTemplateRepository repository
             )
             {
-                _hostingEnvironment = hostingEnvironment;
+                _hostEnvironment = hostEnvironment;
                 _repository = repository;
             }
+            
             public Task<Unit> Handle(
                 LoadPasswordResetEmailTemplate request,
                 CancellationToken cancellationToken
             )
             {
                 var pathToFile = Path.Combine(
-                    _hostingEnvironment.ContentRootPath,
+                    _hostEnvironment.ContentRootPath,
                     "App_Data",
                     "EmailTemplates",
                     "ResetPassword.html"

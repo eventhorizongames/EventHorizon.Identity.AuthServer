@@ -6,24 +6,25 @@ using IdentityServer4.EntityFramework.DbContexts;
 using MediatR;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 
 namespace EventHorizon.Identity.AuthServer.Migrations.RunMigration
 {
     public struct RunMigrationHandler : IRequestHandler<RunMigrationCommand, bool>
     {
-        readonly IHostingEnvironment _hostingEnvironment;
+        readonly IHostEnvironment _hostEnvironment;
         readonly ApplicationDbContext _applicationDbContext;
         readonly PersistedGrantDbContext _persistedGrantDbContext;
         readonly HistoryExtendedConfigurationDbContext _historyExtendedConfigurationDbContext;
 
         public RunMigrationHandler(
-            IHostingEnvironment hostingEnvironment,
+            IHostEnvironment hostEnvironment,
             ApplicationDbContext applicationDbContext,
             PersistedGrantDbContext persistedGrantDbContext,
             HistoryExtendedConfigurationDbContext historyExtendedConfigurationDbContext
         )
         {
-            _hostingEnvironment = hostingEnvironment;
+            _hostEnvironment = hostEnvironment;
             _applicationDbContext = applicationDbContext;
             _persistedGrantDbContext = persistedGrantDbContext;
             _historyExtendedConfigurationDbContext = historyExtendedConfigurationDbContext;

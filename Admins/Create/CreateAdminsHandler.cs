@@ -7,34 +7,34 @@ using EventHorizon.Identity.AuthServer.Services.Claims;
 using EventHorizon.Identity.AuthServer.Services.Role;
 using EventHorizon.Identity.AuthServer.Services.User;
 using MediatR;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace EventHorizon.Identity.AuthServer.Admins.Create
 {
     public struct CreateAdminsHandler : IRequestHandler<CreateAdminsCommand, bool>
     {
-        readonly IMediator _mediator;
-        readonly IHostingEnvironment _hostingEnvironment;
-        readonly ApplicationDbContext _applicationDbContext;
+        private readonly IMediator _mediator;
+        private readonly IHostEnvironment _hostEnvironment;
+        private readonly ApplicationDbContext _applicationDbContext;
 
         public CreateAdminsHandler(
             IMediator mediator,
-            IHostingEnvironment hostingEnvironment,
+            IHostEnvironment hostEnvironment,
             ApplicationDbContext applicationDbContext
         )
         {
             _mediator = mediator;
-            _hostingEnvironment = hostingEnvironment;
+            _hostEnvironment = hostEnvironment;
             _applicationDbContext = applicationDbContext;
         }
 
         public async Task<bool> Handle(CreateAdminsCommand request, CancellationToken cancellationToken)
         {
             var config = new ConfigurationBuilder()
-                .SetBasePath(_hostingEnvironment.ContentRootPath)
+                .SetBasePath(_hostEnvironment.ContentRootPath)
                 .AddJsonFile("admins.json")
-                .AddJsonFile($"admins.{_hostingEnvironment.EnvironmentName}.json", true)
+                .AddJsonFile($"admins.{_hostEnvironment.EnvironmentName}.json", true)
                 .AddEnvironmentVariables()
                 .Build();
 

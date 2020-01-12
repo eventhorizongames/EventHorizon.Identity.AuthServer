@@ -4,14 +4,16 @@ using EventHorizon.Identity.AuthServer.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EventHorizon.Identity.AuthServer.Migrations.ConfigurationDb
 {
     [DbContext(typeof(HistoryExtendedConfigurationDbContext))]
-    partial class HistoryExtendedConfigurationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200112224418_DotnetUpdate")]
+    partial class DotnetUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -682,37 +684,6 @@ namespace EventHorizon.Identity.AuthServer.Migrations.ConfigurationDb
                     b.HasIndex("IdentityResourceId");
 
                     b.ToTable("IdentityProperties");
-                });
-
-            modelBuilder.Entity("Microsoft.EntityFrameworkCore.AutoHistory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("Changed")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("Kind")
-                        .HasColumnType("int");
-
-                    b.Property<string>("RowId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(50)")
-                        .HasMaxLength(50);
-
-                    b.Property<string>("TableName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(128)")
-                        .HasMaxLength(128);
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AutoHistory");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResourceClaim", b =>
