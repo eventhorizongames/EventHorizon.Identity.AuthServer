@@ -199,6 +199,15 @@ namespace EventHorizon.Identity.AuthServer
             services.Configure<AuthMessageSenderOptions>(
                 Configuration.GetSection("Email")
             );
+
+            // Application Insights
+            services.AddApplicationInsightsTelemetry(
+                options => Configuration.GetSection(
+                    "ApplicationInsights"
+                ).Bind(
+                    options
+                )
+            );
         }
 
         public void Configure(IApplicationBuilder app)
