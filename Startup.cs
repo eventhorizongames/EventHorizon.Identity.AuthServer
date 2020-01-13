@@ -9,10 +9,13 @@ using EventHorizon.Identity.AuthServer.Configuration;
 using EventHorizon.Identity.AuthServer.Email.Api;
 using EventHorizon.Identity.AuthServer.Email.State;
 using EventHorizon.Identity.AuthServer.Models;
+using EventHorizon.Identity.AuthServer.Monitoring.Model;
+using EventHorizon.Identity.AuthServer.Monitoring.Telemetry;
 using EventHorizon.Identity.AuthServer.Services;
 using EventHorizon.Identity.AuthServer.Services.Claims;
 using EventHorizon.Identity.AuthServer.Services.Models;
 using MediatR;
+using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -47,7 +50,13 @@ namespace EventHorizon.Identity.AuthServer
                 ).Bind(
                     options
                 )
-            );
+            ).Configure<MonitoringServerConfiguration>(
+                options => {
+                    options.Host = Configuration["VIRTUAL_HOST"] ?? "unset";
+                    options.ServerName = Configuration["ServerName"] ?? "Identity";
+                }
+            ).AddSingleton<ITelemetryInitializer, NodeNameFilter>();
+            
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
             services.AddRazorPages()
                 .AddRazorPagesOptions(options =>
