@@ -228,7 +228,6 @@ namespace EventHorizon.Identity.AuthServer
 
             app.UseRouting();
             app.UseCors("default");
-            app.UseRewriter(new RewriteOptions().AddRedirectToHttps());
             app.UseIdentityServer();
 
             app.UseStaticFiles();
