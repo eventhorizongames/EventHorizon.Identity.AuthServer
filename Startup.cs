@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,13 +51,13 @@ namespace EventHorizon.Identity.AuthServer
                 ).Bind(
                     options
                 )
-            ).Configure<MonitoringServerConfiguration>(
-                options => {
+            ).Configure<MonitoringServerConfiguration>(options =>
+                {
                     options.Host = Configuration["VIRTUAL_HOST"] ?? "unset";
                     options.ServerName = Configuration["ServerName"] ?? "Identity";
                 }
             ).AddSingleton<ITelemetryInitializer, NodeNameFilter>();
-            
+
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
             services.AddRazorPages()
                 .AddRazorPagesOptions(options =>
@@ -190,7 +191,7 @@ namespace EventHorizon.Identity.AuthServer
             });
 
 
-            if (HostEnvironment.IsDevelopment())
+            if (Configuration["Email:ApiKey"] == null)
             {
                 services.AddScoped<IEmailSender, SaveToFileEmailSender>();
             }
@@ -227,6 +228,7 @@ namespace EventHorizon.Identity.AuthServer
 
             app.UseRouting();
             app.UseCors("default");
+            app.UseRewriter(new RewriteOptions().AddRedirectToHttps());
             app.UseIdentityServer();
 
             app.UseStaticFiles();
