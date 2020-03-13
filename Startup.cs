@@ -21,8 +21,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Rewrite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +31,9 @@ namespace EventHorizon.Identity.AuthServer
 {
     public class Startup
     {
+        private const string XForwardedPathBase = "X-Forwarded-PathBase";
+        private const string XForwardedProto = "X-Forwarded-Proto";
+
         public Startup(
             IConfiguration configuration,
             IHostEnvironment hostEnvironment
@@ -206,8 +207,7 @@ namespace EventHorizon.Identity.AuthServer
                 Configuration.GetSection("Email")
             );
         }
-        private const string XForwardedPathBase = "X-Forwarded-PathBase";
-        private const string XForwardedProto = "X-Forwarded-Proto";
+
         public void Configure(IApplicationBuilder app)
         {
             app.AddEmailExtensions();
