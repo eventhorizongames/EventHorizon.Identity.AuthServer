@@ -208,7 +208,12 @@ namespace EventHorizon.Identity.AuthServer
         public void Configure(IApplicationBuilder app)
         {
             app.AddEmailExtensions();
-            app.UseForwardedHeaders();
+            app.UseForwardedHeaders(
+                new ForwardedHeadersOptions
+                {
+                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+                }
+            );
             if (HostEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
