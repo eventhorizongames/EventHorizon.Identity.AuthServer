@@ -18,6 +18,7 @@ using MediatR;
 using Microsoft.ApplicationInsights.Extensibility;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -26,6 +27,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Primitives;
 
 namespace EventHorizon.Identity.AuthServer
 {
@@ -204,16 +206,12 @@ namespace EventHorizon.Identity.AuthServer
                 Configuration.GetSection("Email")
             );
         }
-
+        private const string XForwardedPathBase = "X-Forwarded-PathBase";
+        private const string XForwardedProto = "X-Forwarded-Proto";
         public void Configure(IApplicationBuilder app)
         {
             app.AddEmailExtensions();
-            app.UseForwardedHeaders(
-                new ForwardedHeadersOptions
-                {
-                    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-                }
-            );
+            app.UseForwardedHeaders();
             if (HostEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -233,6 +231,19 @@ namespace EventHorizon.Identity.AuthServer
 
             app.UseRouting();
             app.UseCors("default");
+            app.Use((context, next) =>
+            {
+                if (context.Request.Headers.TryGetValue(XForwardedPathBase, out StringValues pathBase))
+                {
+                    context.Request.PathBase = new PathString(pathBase);
+                }
+                if (context.Request.Headers.TryGetValue(XForwardedProto, out StringValues proto))
+                {
+                    context.Request.Scheme = proto;
+                }
+
+                return next();
+            });
             app.UseIdentityServer();
 
             app.UseStaticFiles();
