@@ -1,6 +1,5 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
@@ -16,6 +15,7 @@ using EventHorizon.Identity.AuthServer.Services.Claims;
 using EventHorizon.Identity.AuthServer.Services.Models;
 using MediatR;
 using Microsoft.ApplicationInsights.Extensibility;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -26,6 +26,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Primitives;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EventHorizon.Identity.AuthServer
 {
@@ -73,7 +74,6 @@ namespace EventHorizon.Identity.AuthServer
                     options.Conventions.AuthorizeFolder("/Manage");
                     options.Conventions.AuthorizeFolder("/Grants");
                     options.Conventions.AuthorizeFolder("/Consent");
-
                 });
 
             var isMSSqlConnectionType = IsMSSQLConnectionType(Configuration["ConnectionType"]);
@@ -161,21 +161,47 @@ namespace EventHorizon.Identity.AuthServer
                     );
                 }
             });
+            var securityKey = default(SecurityKey);
             if (HostEnvironment.IsDevelopment())
             {
                 identityServer.AddDeveloperSigningCredential();
             }
             else
             {
+                var certificate = new X509Certificate2(
+                    Path.Combine(Directory.GetCurrentDirectory(), "certificate.pfx"),
+                    Configuration["IdentityServerKeyPassword"]
+                );
                 identityServer.AddSigningCredential(
-                    new X509Certificate2(
-                        Path.Combine(Directory.GetCurrentDirectory(), "certificate.pfx"),
-                        Configuration["IdentityServerKeyPassword"]
-                    )
+                    certificate
+                );
+                securityKey = new X509SecurityKey(
+                    certificate
                 );
             }
 
-            services.AddAuthentication();
+            services.AddAuthentication()
+                .AddJwtBearer(
+                    JwtBearerDefaults.AuthenticationScheme,
+                    options =>
+                    {
+                        options.Authority = Configuration["IssuerUri"];
+                        options.Audience = "api1";
+
+                        options.TokenValidationParameters = new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = HostEnvironment.IsDevelopment(),
+
+                            ValidIssuer = Configuration["IssuerUri"],
+                            ValidAudience = "api1",
+                            IssuerSigningKey = securityKey,
+                        };
+                    }
+                )
+            ;
 
             services.AddAuthorization(options =>
             {
