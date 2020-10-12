@@ -187,6 +187,7 @@ namespace EventHorizon.Identity.AuthServer
                     {
                         options.Authority = Configuration["Auth:Authority"];
                         options.Audience = "api1";
+                        options.RequireHttpsMetadata = !HostEnvironment.IsDevelopment();
 
                         options.TokenValidationParameters = new TokenValidationParameters
                         {
