@@ -185,7 +185,7 @@ namespace EventHorizon.Identity.AuthServer
                     JwtBearerDefaults.AuthenticationScheme,
                     options =>
                     {
-                        options.Authority = Configuration["IssuerUri"];
+                        options.Authority = Configuration["Auth:Authority"];
                         options.Audience = "api1";
 
                         options.TokenValidationParameters = new TokenValidationParameters
