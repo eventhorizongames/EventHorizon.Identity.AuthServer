@@ -7,11 +7,15 @@ namespace EventHorizon.Identity.AuthServer.Clients.Extensions
     {
         public static Client ToEntity(
             this ClientCreateModel client
-        ) {
+        )
+        {
             return new Client
             {
                 ClientId = client.Id,
                 ClientName = client.Name,
+
+                AllowAccessTokensViaBrowser = client.AllowAccessTokensViaBrowser,
+                RequireClientSecret = client.RequireClientSecret,
             };
         }
     }
