@@ -186,7 +186,7 @@ namespace EventHorizon.Identity.AuthServer
                     options =>
                     {
                         options.Authority = Configuration["Auth:Authority"];
-                        options.Audience = "api1";
+                        options.Audience = Configuration["Auth:Audience"];
                         options.RequireHttpsMetadata = !HostEnvironment.IsDevelopment();
 
                         options.TokenValidationParameters = new TokenValidationParameters
@@ -197,7 +197,7 @@ namespace EventHorizon.Identity.AuthServer
                             ValidateIssuerSigningKey = HostEnvironment.IsDevelopment(),
 
                             ValidIssuer = Configuration["IssuerUri"],
-                            ValidAudience = "api1",
+                            ValidAudience = Configuration["Auth:Audience"],
                             IssuerSigningKey = securityKey,
                         };
                     }
