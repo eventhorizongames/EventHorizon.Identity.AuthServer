@@ -220,8 +220,8 @@ namespace EventHorizon.Identity.AuthServer
                 });
             });
 
-
-            if (Configuration["Email:ApiKey"] == null)
+            if (!Configuration.GetValue<bool>("Email:IsEnabled")
+                || Configuration["Email:ApiKey"] == null)
             {
                 services.AddScoped<IEmailSender, SaveToFileEmailSender>();
             }
