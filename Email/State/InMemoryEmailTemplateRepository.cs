@@ -1,12 +1,12 @@
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using EventHorizon.Identity.AuthServer.Email.Api;
 
 namespace EventHorizon.Identity.AuthServer.Email.State
 {
     public class InMemoryEmailTemplateRepository : EmailTemplateRepository
     {
-        private ConcurrentDictionary<EmailTypes, string> STATE = new ConcurrentDictionary<EmailTypes, string>();
+        private readonly ConcurrentDictionary<EmailTypes, string> STATE = new ConcurrentDictionary<EmailTypes, string>();
+
         void EmailTemplateRepository.Set(
             EmailTypes type,
             string template
@@ -23,10 +23,9 @@ namespace EventHorizon.Identity.AuthServer.Email.State
             EmailTypes type
         )
         {
-            string template;
             if (STATE.TryGetValue(
                 type,
-                out template
+                out var template
             ))
             {
                 return template;

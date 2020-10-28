@@ -10,12 +10,13 @@ using Microsoft.Extensions.Hosting;
 
 namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.Clients
 {
-    public struct InitializeClientsHandler : IRequestHandler<InitializeClientsCommand, bool>
+    public class InitializeClientsCommandHandler 
+        : IRequestHandler<InitializeClientsCommand, bool>
     {
-        readonly IHostEnvironment _hostEnvironment;
-        readonly HistoryExtendedConfigurationDbContext _context;
+        private readonly IHostEnvironment _hostEnvironment;
+        private readonly HistoryExtendedConfigurationDbContext _context;
 
-        public InitializeClientsHandler(
+        public InitializeClientsCommandHandler(
             IHostEnvironment hostEnvironment,
             HistoryExtendedConfigurationDbContext context
         )
@@ -24,13 +25,18 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.Clients
             _context = context;
         }
 
-        public Task<bool> Handle(InitializeClientsCommand request, CancellationToken cancellationToken)
+        public Task<bool> Handle(
+            InitializeClientsCommand request, 
+            CancellationToken cancellationToken
+        )
         {
             if (!_context.Clients.Any())
             {
                 foreach (var client in GetClients())
                 {
-                    _context.Clients.Add(client.ToEntity());
+                    _context.Clients.Add(
+                        client.ToEntity()
+                    );
                 }
                 _context.SaveChanges();
             }
@@ -43,17 +49,25 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.Clients
         {
             // Load configuration from a file
             var clientsConfig = new ConfigurationBuilder()
-                .SetBasePath(_hostEnvironment.ContentRootPath)
-                .AddJsonFile("clients.json")
-                .AddJsonFile($"clients.{_hostEnvironment.EnvironmentName}.json", true)
-                .AddEnvironmentVariables()
+                .SetBasePath(
+                    _hostEnvironment.ContentRootPath
+                ).AddJsonFile(
+                    "clients.json"
+                ).AddJsonFile(
+                    $"clients.{_hostEnvironment.EnvironmentName}.json", 
+                    true
+                ).AddEnvironmentVariables()
                 .Build();
 
             // Bind Admin Instance from Config
             var clientConfigFile = new ClientConfigurationFile();
-            clientsConfig.Bind(clientConfigFile);
+            clientsConfig.Bind(
+                clientConfigFile
+            );
 
-            return clientConfigFile.Clients.Select(client => client.ToEntity());
+            return clientConfigFile.Clients.Select(
+                client => client.ToEntity()
+            );
         }
     }
 }

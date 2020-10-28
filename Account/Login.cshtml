@@ -3,7 +3,7 @@
 @model LoginViewModel;
 
 @functions {
-    public class LoginViewModel : PageModel 
+    public class LoginViewModel : PageModel
     {
         private readonly ILogger _logger;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -61,7 +61,7 @@
 
             return Page();
         }
-        
+
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> OnPost(
             string button
@@ -85,7 +85,7 @@
                     {
                         // if the client is PKCE then we assume it's native, so this change in how to
                         // return the response is for better UX for the end user.
-                        return RedirectToPage("Redirect", new RedirectViewModel { 
+                        return RedirectToPage("Redirect", new RedirectViewModel {
                             RedirectUrl = ReturnUrl
                         });
                     }
@@ -108,17 +108,17 @@
                 {
                     var result = await _signInManager.PasswordSignInAsync(
                         user,
-                        Password, 
-                        false, 
+                        Password,
+                        false,
                         true
                     );
                     if (!result.Succeeded)
                     {
                         if (result.RequiresTwoFactor)
                         {
-                            return RedirectToPage("./LoginWith2fa", new { 
-                                ReturnUrl, 
-                                RememberLogin 
+                            return RedirectToPage("./LoginWith2fa", new {
+                                ReturnUrl,
+                                RememberLogin
                             });
                         }
                         if (result.IsLockedOut)
@@ -142,10 +142,11 @@
                         };
 
                         await _events.RaiseAsync(new UserLoginSuccessEvent(
-                            user.UserName, 
-                            user.Id, 
+                            user.UserName,
+                            user.Id,
                             user.UserName
                         ));
+
                         // issue authentication cookie with subject ID and username
                         // await HttpContext.SignInAsync(user.Id, user.UserName, props);
                         await _signInManager.SignInAsync(user, props);
@@ -156,7 +157,7 @@
                             {
                                 // if the client is PKCE then we assume it's native, so this change in how to
                                 // return the response is for better UX for the end user.
-                                return RedirectToPage("Redirect", new RedirectViewModel { 
+                                return RedirectToPage("Redirect", new RedirectViewModel {
                                     RedirectUrl = ReturnUrl
                                 });
                             }
@@ -183,11 +184,11 @@
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(
-                    Email, 
+                    Email,
                     "invalid credentials"
                 ));
                 ModelState.AddModelError(
-                    "", 
+                    "",
                     AccountOptions.InvalidCredentialsErrorMessage
                 );
             }
@@ -196,7 +197,7 @@
             await BuildLoginViewModelAsync();
             return Page();
         }
-        
+
         private async Task BuildLoginViewModelAsync()
         {
             var context = await _interaction.GetAuthorizationContextAsync(ReturnUrl);

@@ -220,8 +220,7 @@ namespace EventHorizon.Identity.AuthServer
                 });
             });
 
-            if (!Configuration.GetValue<bool>("Email:IsEnabled")
-                || Configuration["Email:ApiKey"] == null)
+            if (Configuration["Email:ApiKey"] == null)
             {
                 services.AddScoped<IEmailSender, SaveToFileEmailSender>();
             }
@@ -256,6 +255,8 @@ namespace EventHorizon.Identity.AuthServer
                 )
             );
 
+            app.UseStaticFiles();
+
             app.UseRouting();
             app.UseCors("default");
             app.Use((context, next) =>
@@ -271,11 +272,10 @@ namespace EventHorizon.Identity.AuthServer
 
                 return next();
             });
+
             app.UseIdentityServer();
-
-            app.UseStaticFiles();
-
             app.UseAuthorization();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapRazorPages();
