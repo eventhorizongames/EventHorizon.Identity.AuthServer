@@ -15,30 +15,50 @@ namespace EventHorizon.Identity.AuthServer.Configuration
         public DbSet<ClientPostLogoutRedirectUri> ClientPostLogoutRedirectUris { get; set; }
         public DbSet<ClientCorsOrigin> ClientCorsOrigins { get; set; }
         public DbSet<ClientScope> ClientScopes { get; set; }
-        
-        public HistoryExtendedConfigurationDbContext(DbContextOptions<HistoryExtendedConfigurationDbContext> options, ConfigurationStoreOptions storeOptions)
-            : base(options, storeOptions)
+
+        public HistoryExtendedConfigurationDbContext(
+            DbContextOptions<HistoryExtendedConfigurationDbContext> options,
+            ConfigurationStoreOptions storeOptions
+        ) : base(
+            options,
+            storeOptions
+        )
         {
         }
 
-        protected override void OnModelCreating(ModelBuilder builder)
+        protected override void OnModelCreating(
+            ModelBuilder builder
+        )
         {
-            base.OnModelCreating(builder);
+            base.OnModelCreating(
+                builder
+            );
             // Customize the ASP.NET Identity model and override the defaults if needed.
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
             builder.EnableAutoHistory(4000);
         }
 
-        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        public override int SaveChanges(
+            bool acceptAllChangesOnSuccess
+        )
         {
             this.EnsureAutoHistory();
-            return base.SaveChanges(acceptAllChangesOnSuccess);
+            return base.SaveChanges(
+                acceptAllChangesOnSuccess
+            );
         }
-        public override Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+
+        public override Task<int> SaveChangesAsync(
+            bool acceptAllChangesOnSuccess,
+            CancellationToken cancellationToken = default(CancellationToken)
+        )
         {
             this.EnsureAutoHistory();
-            return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+            return base.SaveChangesAsync(
+                acceptAllChangesOnSuccess, 
+                cancellationToken
+            );
         }
     }
 }

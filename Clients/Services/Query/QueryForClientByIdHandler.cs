@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EventHorizon.Identity.AuthServer.Clients.Models;
 using EventHorizon.Identity.AuthServer.Configuration;
 using EventHorizon.Identity.AuthServer.Models.Commands;
 using MediatR;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventHorizon.Identity.AuthServer.Clients.Services.Query
 {
@@ -15,6 +12,7 @@ namespace EventHorizon.Identity.AuthServer.Clients.Services.Query
         : IRequestHandler<QueryForClientById, CommandResult<ClientModel>>
     {
         private readonly HistoryExtendedConfigurationDbContext _configurationDbContext;
+
         public QueryForClientByIdHandler(
             HistoryExtendedConfigurationDbContext configurationDbContext
         )
@@ -22,7 +20,7 @@ namespace EventHorizon.Identity.AuthServer.Clients.Services.Query
             _configurationDbContext = configurationDbContext;
         }
 
-        public async Task<CommandResult<ClientModel>> Handle(
+        public Task<CommandResult<ClientModel>> Handle(
             QueryForClientById request, 
             CancellationToken cancellationToken
         )
@@ -31,25 +29,32 @@ namespace EventHorizon.Identity.AuthServer.Clients.Services.Query
                 a => a.ClientId == request.Id
             ))
             {
-                return new CommandResult<ClientModel>(
-                    "client_not_found"
+                return Task.FromResult(
+                    new CommandResult<ClientModel>(
+                        "client_not_found"
+                    )
                 );
             }
             var clientEntity = _configurationDbContext.Clients
-                    //.Include("AllowedScopes")
-                    //.Include("AllowedGrantTypes")
-                    //.Include("ClientSecrets")
-                    //.Include("RedirectUris")
-                    //.Include("PostLogoutRedirectUris")
-                    //.Include("AllowedCorsOrigins")
-                    //.Include("AllowedScopes")
-                    .FirstOrDefault(a => a.ClientId == request.Id);
-            return new CommandResult<ClientModel>(
-                new ClientModel
-                {
-                    Id = request.Id,
-                    Name = clientEntity.ClientName,
-                }
+                //.Include("AllowedScopes")
+                //.Include("AllowedGrantTypes")
+                //.Include("ClientSecrets")
+                //.Include("RedirectUris")
+                //.Include("PostLogoutRedirectUris")
+                //.Include("AllowedCorsOrigins")
+                //.Include("AllowedScopes")
+                .FirstOrDefault(
+                    client => client.ClientId == request.Id
+                );
+
+            return Task.FromResult(
+                new CommandResult<ClientModel>(
+                    new ClientModel
+                    {
+                        Id = request.Id,
+                        Name = clientEntity.ClientName,
+                    }
+                )
             );
         }
     }

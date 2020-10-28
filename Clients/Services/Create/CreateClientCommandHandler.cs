@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using EventHorizon.Identity.AuthServer.Clients.Extensions;
@@ -9,7 +8,6 @@ using EventHorizon.Identity.AuthServer.Configuration;
 using EventHorizon.Identity.AuthServer.Models.Commands;
 using IdentityServer4.EntityFramework.Entities;
 using MediatR;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace EventHorizon.Identity.AuthServer.Clients.Services.Create
 {

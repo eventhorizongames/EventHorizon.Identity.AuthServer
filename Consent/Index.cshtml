@@ -11,10 +11,11 @@
 
 @functions {
     [SecurityHeaders]
-    public class IndexModel : PageModel 
+    public class IndexModel 
+        : PageModel
     {
-        readonly IMediator _mediator;
-        readonly IClientStore _clientStore;
+        private readonly IMediator _mediator;
+        private readonly IClientStore _clientStore;
 
         public IndexModel(
             IMediator mediator,
@@ -41,7 +42,7 @@
 
         public async Task<IActionResult> OnGet(
             string returnUrl
-        ) 
+        )
         {
             var response = await _mediator.Send(
                 new BuildConsentViewModel(
@@ -80,10 +81,10 @@
                     // if the client is PKCE then we assume it's native, so this change in how to
                     // return the response is for better UX for the end user.
                     return RedirectToPage(
-                        "Redirect", 
-                        new RedirectViewModel 
-                        { 
-                            RedirectUrl = result.RedirectUri 
+                        "Redirect",
+                        new RedirectViewModel
+                        {
+                            RedirectUrl = result.RedirectUri
                         }
                     );
                 }

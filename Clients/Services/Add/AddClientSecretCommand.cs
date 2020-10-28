@@ -1,5 +1,4 @@
-﻿using System;
-using EventHorizon.Identity.AuthServer.Clients.Models;
+﻿using EventHorizon.Identity.AuthServer.Clients.Models;
 using EventHorizon.Identity.AuthServer.Models.Commands;
 using MediatR;
 

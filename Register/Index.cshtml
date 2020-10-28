@@ -12,13 +12,14 @@
 }
 
 @functions {
-    public class IndexModel : PageModel {
+    public class IndexModel : PageModel
+    {
 
-        readonly UserManager<ApplicationUser> _userManager;
-        readonly SignInManager<ApplicationUser> _signInManager;
-        readonly IEmailSender _emailSender;
-        readonly ILogger _logger;
-        readonly IMediator _mediator;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IEmailSender _emailSender;
+        private readonly ILogger _logger;
+        private readonly IMediator _mediator;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
@@ -39,7 +40,8 @@
 
         public void OnGet(
             string returnUrl
-        ) {
+        )
+        {
             ViewData["ReturnUrl"] = returnUrl;
         }
 
@@ -72,23 +74,28 @@
 
             if (result.Succeeded)
             {
-                _logger.LogInformation("User created a new account with password.");
+                _logger.LogInformation(
+                    "New User Account created. {UserId}",
+                    user.Id
+                );
 
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 await _mediator.Send(
                     new SendConfirmationEmail(
                         user.Email,
                         Url.EmailConfirmationLink(
-                            user.Id, 
-                            code, 
+                            user.Id,
+                            code,
                             Request.Scheme
                         )
                     )
                 );
 
                 await _signInManager.SignInAsync(user, isPersistent: false);
-                _logger.LogInformation("User created a new account with password.");
-                return RedirectToLocal(returnUrl);
+
+                return RedirectToLocal(
+                    returnUrl ?? "/"
+                );
             }
             AddErrors(result);
 
@@ -122,7 +129,7 @@
 
 <div class="row">
     <div class="col-md-4">
-        <form  class="registration-form" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+        <form class="registration-form" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
             <h4 id="page-description">Create a new account.</h4>
             <hr />
             <div asp-validation-summary="All" class="text-danger"></div>

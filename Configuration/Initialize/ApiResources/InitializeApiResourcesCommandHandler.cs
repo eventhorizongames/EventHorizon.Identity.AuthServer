@@ -10,12 +10,13 @@ using Microsoft.Extensions.Hosting;
 
 namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.ApiResources
 {
-    public struct InitializeApiResourcesHandler : IRequestHandler<InitializeApiResourcesCommand, bool>
+    public class InitializeApiResourcesCommandHandler
+        : IRequestHandler<InitializeApiResourcesCommand, bool>
     {
         private readonly IHostEnvironment _hostEnvironment;
         private readonly HistoryExtendedConfigurationDbContext _context;
 
-        public InitializeApiResourcesHandler(
+        public InitializeApiResourcesCommandHandler(
             IHostEnvironment hostEnvironment,
             HistoryExtendedConfigurationDbContext context
         )
@@ -24,13 +25,18 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.ApiResources
             _context = context;
         }
 
-        public Task<bool> Handle(InitializeApiResourcesCommand request, CancellationToken cancellationToken)
+        public Task<bool> Handle(
+            InitializeApiResourcesCommand request,
+            CancellationToken cancellationToken
+        )
         {
             if (!_context.ApiResources.Any())
             {
                 foreach (var resource in GetApiResources())
                 {
-                    _context.ApiResources.Add(resource.ToEntity());
+                    _context.ApiResources.Add(
+                        resource.ToEntity()
+                    );
                 }
                 _context.SaveChanges();
             }
@@ -42,10 +48,14 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.ApiResources
         private IEnumerable<ApiResource> GetApiResources()
         {
             var apiResourceConfiguration = new ConfigurationBuilder()
-                .SetBasePath(_hostEnvironment.ContentRootPath)
-                .AddJsonFile("api-resources.json")
-                .AddJsonFile($"api-resources.{_hostEnvironment.EnvironmentName}.json", true)
-                .AddEnvironmentVariables()
+                .SetBasePath(
+                    _hostEnvironment.ContentRootPath
+                ).AddJsonFile(
+                    "api-resources.json"
+                ).AddJsonFile(
+                    $"api-resources.{_hostEnvironment.EnvironmentName}.json",
+                    true
+                ).AddEnvironmentVariables()
                 .Build();
 
             var apiResourceFile = new ApiResourceFile();
@@ -53,11 +63,13 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.ApiResources
                 apiResourceFile
             );
 
-            return apiResourceFile.ApiResources.Select(resource => new ApiResource(
-                resource.Name,
-                resource.DisplayName,
-                resource.ClaimTypes
-            ));
+            return apiResourceFile.ApiResources.Select(
+                resource => new ApiResource(
+                    resource.Name,
+                    resource.DisplayName,
+                    resource.ClaimTypes
+                )
+            );
         }
     }
 }
