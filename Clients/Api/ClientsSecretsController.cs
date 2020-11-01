@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using EventHorizon.Identity.AuthServer.Clients.Models;
 using EventHorizon.Identity.AuthServer.Clients.Services.Add;
+using EventHorizon.Identity.AuthServer.Clients.Services.Remove;
 using EventHorizon.Identity.AuthServer.Models.Commands;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -42,6 +43,38 @@ namespace EventHorizon.Identity.AuthServer.Clients.Api
                 new AddClientSecretCommand(
                     clientId,
                     secret
+                )
+            );
+
+            if (!result.Success)
+            {
+                return BadRequest(
+                    result
+                );
+            }
+
+            return result;
+        }
+
+        [HttpDelete("remove")]
+        public async Task<ActionResult<CommandResult<bool>>> Add(
+            string clientId,
+            [FromQuery]
+            string description
+        )
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(
+                    new CommandResult<bool>(
+                        "secret_is_invalid"
+                    )
+                );
+            }
+            var result = await _mediator.Send(
+                new RemoveClientSecretCommand(
+                    clientId,
+                    description
                 )
             );
 
