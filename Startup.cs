@@ -4,6 +4,9 @@ using System.Net;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
 using EventHorizon.Identity.AuthServer.Application;
+using EventHorizon.Identity.AuthServer.Captcha.Api;
+using EventHorizon.Identity.AuthServer.Captcha.Models;
+using EventHorizon.Identity.AuthServer.Captcha.Service;
 using EventHorizon.Identity.AuthServer.Configuration;
 using EventHorizon.Identity.AuthServer.Email.Api;
 using EventHorizon.Identity.AuthServer.Email.State;
@@ -48,6 +51,21 @@ namespace EventHorizon.Identity.AuthServer
 
         public void ConfigureServices(IServiceCollection services)
         {
+            // Setup Captcha
+            services.AddSingleton(
+                new CaptchaSettings(
+                    Configuration["Captcha:SiteKey"],
+                    Configuration["Captcha:Secret"]
+                )
+            ).AddHttpClient<CaptchaService, CaptchaServiceHttpClient>(
+                configuration =>
+                {
+                    configuration.BaseAddress = new Uri(
+                        Configuration["Captcha:ApiUrl"]
+                    );
+                }
+            );
+
             // Application Insights
             services.AddApplicationInsightsTelemetry(
                 options => Configuration.GetSection(
@@ -63,7 +81,8 @@ namespace EventHorizon.Identity.AuthServer
             ).AddSingleton<ITelemetryInitializer, NodeNameFilter>();
 
             services.AddMediatR(typeof(Startup).GetTypeInfo().Assembly);
-            services.AddRazorPages()
+            services.AddHttpContextAccessor()
+                .AddRazorPages()
                 .AddRazorPagesOptions(options =>
                 {
                     options.RootDirectory = "/";

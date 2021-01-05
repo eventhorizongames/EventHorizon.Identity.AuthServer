@@ -6,6 +6,8 @@
 @using EventHorizon.Identity.AuthServer.Services.User;
 @using EventHorizon.Identity.AuthServer.Register.Models;
 @using EventHorizon.Identity.AuthServer.Email.Send;
+@using EventHorizon.Identity.AuthServer.Captcha.Models
+@using EventHorizon.Identity.AuthServer.Captcha.Validate
 
 @{
     ViewData["Title"] = "Register";
@@ -14,25 +16,30 @@
 @functions {
     public class IndexModel : PageModel
     {
+        private static decimal Score_Threshold = 0.8m;
 
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
         private readonly ILogger _logger;
         private readonly IMediator _mediator;
+        private readonly CaptchaSettings _captchaSettings;
 
         public IndexModel(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender,
             ILogger<IndexModel> logger,
-            IMediator mediator)
+            IMediator mediator,
+            CaptchaSettings captchaSettings
+        )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _emailSender = emailSender;
             _logger = logger;
             _mediator = mediator;
+            _captchaSettings = captchaSettings;
         }
 
         [BindProperty]
@@ -42,6 +49,7 @@
             string returnUrl
         )
         {
+            ViewData["CaptchaSiteKey"] = _captchaSettings.SiteKey;
             ViewData["ReturnUrl"] = returnUrl;
         }
 
@@ -52,6 +60,20 @@
             ViewData["ReturnUrl"] = returnUrl;
             if (!ModelState.IsValid)
             {
+                return Page();
+            }
+            var captchaResult = await _mediator.Send(
+                new ValidateCaptchaCommand(
+                    UserRegistration.CaptchaToken
+                )
+            );
+            if (!captchaResult.Success
+                || captchaResult.Score < Score_Threshold)
+            {
+                ModelState.AddModelError(
+                    string.Empty,
+                    $"Failed Bot check, are you sure your not a bot."
+                );
                 return Page();
             }
             var user = new ApplicationUser
@@ -129,7 +151,11 @@
 
 <div class="row">
     <div class="col-md-4">
-        <form class="registration-form" asp-route-returnUrl="@ViewData["ReturnUrl"]" method="post">
+        <form id="registration-form"
+              name="registration-form"
+              class="registration-form"
+              asp-route-returnUrl="@ViewData["ReturnUrl"]"
+              method="post">
             <h4 id="page-description">Create a new account.</h4>
             <hr />
             <div asp-validation-summary="All" class="text-danger"></div>
@@ -148,11 +174,23 @@
                 <input asp-for="UserRegistration.ConfirmPassword" class="form-control" />
                 <span asp-validation-for="UserRegistration.ConfirmPassword" class="text-danger"></span>
             </div>
-            <button id="submit" type="submit" class="btn btn-default">Register</button>
+            <input id="CaptchaToken" asp-for="UserRegistration.CaptchaToken" type="hidden" />
+            <button class="btn btn-default g-recaptcha"
+                    data-sitekey="@ViewData["CaptchaSiteKey"]"
+                    data-callback="onRegistrationSubmit"
+                    data-action="auth/registration">
+                Register
+            </button>
         </form>
     </div>
 </div>
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
+    <script>
+        function onRegistrationSubmit(token) {
+            document.getElementById("CaptchaToken").value = token;
+            document.getElementById("registration-form").submit();
+        }
+    </script>
 }

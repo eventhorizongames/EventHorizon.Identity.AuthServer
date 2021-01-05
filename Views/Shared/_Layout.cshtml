@@ -19,6 +19,8 @@
     <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" />
+    <script src="https://www.google.com/recaptcha/api.js"></script>
+
     @RenderSection("styles", required: false)
     @Html.Raw(JavaScriptSnippet.FullScript)
 </head>
@@ -49,10 +51,11 @@
                             <li><a asp-page="/Manage/Index">Manage</a></li>
                             <li><a asp-page="/Account/Logout" asp-route-redirectUrl="/">Logout</a></li>
                             <li></li>
-                            @if(isAdmin) {
-                            <li><a asp-page="/Clients/Index">Clients</a></li>
-                            <li><a asp-page="/Resource/Index">Resources</a></li>
-                            <li><a asp-page="/Users/Index">Users</a></li>
+                            @if (isAdmin)
+                            {
+                                <li><a asp-page="/Clients/Index">Clients</a></li>
+                                <li><a asp-page="/Resource/Index">Resources</a></li>
+                                <li><a asp-page="/Users/Index">Users</a></li>
                             }
                         </ul>
                     </li>

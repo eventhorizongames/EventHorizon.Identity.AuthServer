@@ -21,6 +21,8 @@ namespace EventHorizon.Identity.AuthServer.Register.Models
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
 
+        public string CaptchaToken { get; set; }
+
         public ProfileModel Profile { get; set; } = new ProfileModel();
     }
 }
