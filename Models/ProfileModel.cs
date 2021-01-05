@@ -12,6 +12,7 @@ namespace EventHorizon.Identity.AuthServer.Models
         [Display(Name = "Phone number")]
         public string PhoneNumber { get; set; }
 
+        [Required]
         [Display(Name = "First name")]
         public string FirstName { get; set; }
 
