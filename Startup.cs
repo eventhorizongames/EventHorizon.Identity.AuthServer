@@ -266,7 +266,7 @@ namespace EventHorizon.Identity.AuthServer
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler("/Error");
             }
             AuthDatabase.InitializeDatabase(
                 app.ApplicationServices,
@@ -275,6 +275,8 @@ namespace EventHorizon.Identity.AuthServer
                     HostEnvironment.IsDevelopment()
                 )
             );
+
+            app.UseStatusCodePagesWithRedirects("/StatusCode?code={0}");
 
             app.UseStaticFiles();
 
