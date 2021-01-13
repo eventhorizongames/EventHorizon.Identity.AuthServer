@@ -30,7 +30,7 @@ namespace EventHorizon.Identity.AuthServer.StatusCode
             }
             else if (ErrorStatusCode == 500)
             {
-                ErrorMessage = "My custom 500 error message.";
+                ErrorMessage = "There was a server error, please contact support with the Request Id below.";
             }
             else
             {
