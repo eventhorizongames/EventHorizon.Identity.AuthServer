@@ -23,6 +23,10 @@ namespace EventHorizon.Identity.AuthServer.Register.Models
 
         public string CaptchaToken { get; set; }
 
+        [Display(Name = "Accept Service Agreements")]
+        [Range(typeof(bool), "true", "true", ErrorMessage = "Must Accept Service Agreements.")]
+        public bool AcceptServiceAgreements { get; set; }
+
         public ProfileModel Profile { get; set; } = new ProfileModel();
     }
 }

@@ -202,6 +202,13 @@
         </div>
         <div class="col-md-12">
             <input id="CaptchaToken" asp-for="UserRegistration.CaptchaToken" type="hidden" />
+            <div class="form-group">
+                <label asp-for="UserRegistration.AcceptServiceAgreements">
+                    <input asp-for="UserRegistration.AcceptServiceAgreements" type="checkbox" /> Accept <a class="link" href="https://ehzgames.studio/terms-of-service" target="_blank">Terms of Service</a> and <a class="link" href="https://ehzgames.studio/privacy-policy" target="_blank">Privacy Policy</a>
+                </label>
+                <br />
+                <span asp-validation-for="UserRegistration.AcceptServiceAgreements" class="text-danger"></span>
+            </div>
             <button class="btn btn-default g-recaptcha"
                     data-sitekey="@ViewData["CaptchaSiteKey"]"
                     data-callback="onRegistrationSubmit"
