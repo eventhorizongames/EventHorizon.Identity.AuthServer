@@ -23,7 +23,7 @@ namespace EventHorizon.Identity.AuthServer.Models.Commands
         public CommandResult(
             bool success,
             T result,
-            string? errorCode = null
+            string errorCode = null
         )
         {
             Success = success;

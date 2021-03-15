@@ -13,7 +13,6 @@ namespace EventHorizon.Identity.AuthServer.Configuration
         public DbSet<ClientSecret> ClientSecrets { get; set; }
         public DbSet<ClientRedirectUri> ClientRedirectUris { get; set; }
         public DbSet<ClientPostLogoutRedirectUri> ClientPostLogoutRedirectUris { get; set; }
-        public DbSet<ClientCorsOrigin> ClientCorsOrigins { get; set; }
         public DbSet<ClientScope> ClientScopes { get; set; }
 
         public HistoryExtendedConfigurationDbContext(

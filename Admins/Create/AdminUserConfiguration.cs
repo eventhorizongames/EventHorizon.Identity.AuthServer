@@ -8,6 +8,7 @@ namespace EventHorizon.Identity.AuthServer.Admins.Create
     }
     public class AdminUser
     {
+        public string Id { get; set; }
         public string Email { get; set; }
         public string Password { get; set; }
     }

@@ -6,11 +6,27 @@ Need to make sure AutoHistory is not created during any migrations other than th
 ## Create Migration
 
 ~~~ bash
-dotnet ef migrations add DotnetUpdate --context ApplicationDbContext --output-dir Migrations\ApplicationDb
+# Install EF Tools
+dotnet tool install --global dotnet-ef --version 5.0.4
+~~~
 
-dotnet ef migrations add DotnetUpdate --context HistoryExtendedConfigurationDbContext --output-dir Migrations\ConfigurationDb
+~~~ bash
+# Update Database to current migrations
+dotnet ef database update --context ApplicationDbContext
 
-dotnet ef migrations add DotnetUpdate --context PersistedGrantDbContext --output-dir Migrations\PersistedGrantDb
+dotnet ef database update --context HistoryExtendedConfigurationDbContext
+
+dotnet ef database update --context PersistedGrantDbContext
+
+~~~
+
+~~~ bash
+dotnet ef migrations add ProjectDependencyUpdate --context ApplicationDbContext --output-dir Migrations\ApplicationDb
+
+dotnet ef migrations add ProjectDependencyUpdate --context HistoryExtendedConfigurationDbContext --output-dir Migrations\ConfigurationDb
+
+dotnet ef migrations add ProjectDependencyUpdate --context PersistedGrantDbContext --output-dir Migrations\PersistedGrantDb
+
 ~~~
 
 ## Update Connected DB

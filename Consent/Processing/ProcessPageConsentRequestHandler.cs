@@ -52,14 +52,14 @@ namespace EventHorizon.Identity.AuthServer.Consent.Processing
             // user clicked 'no' - send back the standard 'access_denied' response
             if (model.Button == "no")
             {
-                grantedConsent = ConsentResponse.Denied;
+                grantedConsent = new ConsentResponse { Error = AuthorizationError.AccessDenied };
 
                 // emit event
                 await _events.RaiseAsync(
                     new ConsentDeniedEvent(
                         user.GetSubjectId(),
                         result.ClientId,
-                        request.ScopesRequested
+                        request.ValidatedResources.RawScopeValues
                     )
                 );
             }
@@ -85,16 +85,17 @@ namespace EventHorizon.Identity.AuthServer.Consent.Processing
                     grantedConsent = new ConsentResponse
                     {
                         RememberConsent = model.RememberConsent,
-                        ScopesConsented = scopes.ToArray()
+                        ScopesValuesConsented = scopes.ToArray(),
+                        Description = model.Description,
                     };
 
                     // emit event
                     await _events.RaiseAsync(
                         new ConsentGrantedEvent(
                             user.GetSubjectId(),
-                            request.ClientId,
-                            request.ScopesRequested,
-                            grantedConsent.ScopesConsented,
+                            request.Client.ClientId,
+                            request.ValidatedResources.RawScopeValues,
+                            grantedConsent.ScopesValuesConsented,
                             grantedConsent.RememberConsent
                         )
                     );
@@ -120,7 +121,7 @@ namespace EventHorizon.Identity.AuthServer.Consent.Processing
 
                 // indicate that's it ok to redirect back to authorization endpoint
                 result.RedirectUri = model.ReturnUrl;
-                result.ClientId = request.ClientId;
+                result.ClientId = request.Client.ClientId;
             }
             else
             {

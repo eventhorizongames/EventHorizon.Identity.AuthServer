@@ -23,14 +23,18 @@
             );
         if (apiResource.Scopes
             .FirstOrDefault(
-                a => a.Name == Name
+                a => a.Scope == Name
             ) == null
         )
         {
-            apiResource.Scopes.Add(new ApiScope
+            apiResource.Scopes.Add(new ApiResourceScope
             {
-                Name = Name,
-                DisplayName = DisplayName
+                Scope = Name,
+                ApiResource = new ApiResource
+                {
+                    Name = Name,
+                    DisplayName = DisplayName
+                }
             });
             _configurationDbContext.Update(
                 apiResource
@@ -39,7 +43,7 @@
         }
 
         return RedirectToPage(
-            "../Index", 
+            "../Index",
             new { Id = resourceId }
         );
     }

@@ -103,6 +103,7 @@ namespace EventHorizon.Identity.AuthServer.Admins.Create
                         {
                             User = new Models.ApplicationUser
                             {
+                                Id = admin.Id ?? System.Guid.NewGuid().ToString(),
                                 UserName = admin.Email,
                                 Email = admin.Email,
                             },
