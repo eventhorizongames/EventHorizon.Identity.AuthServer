@@ -7,11 +7,10 @@
 @using EventHorizon.Identity.AuthServer.Consent.Models;
 @using EventHorizon.Identity.AuthServer.Consent.Processing;
 @using EventHorizon.Identity.AuthServer.Consent.Build;
-@using EventHorizon.Identity.AuthServer.Account.Models;
 
 @functions {
     [SecurityHeaders]
-    public class IndexModel 
+    public class IndexModel
         : PageModel
     {
         private readonly IMediator _mediator;
@@ -36,6 +35,7 @@
 
         public string Button { get; private set; }
         public IEnumerable<string> ScopesConsented { get; private set; }
+        public string Description { get; private set; }
         public bool RememberConsent { get; private set; }
         public string ReturnUrl { get; private set; }
 
@@ -74,21 +74,6 @@
 
             if (result.IsRedirect)
             {
-                if (await _clientStore.IsPkceClientAsync(
-                    result.ClientId
-                ))
-                {
-                    // if the client is PKCE then we assume it's native, so this change in how to
-                    // return the response is for better UX for the end user.
-                    return RedirectToPage(
-                        "Redirect",
-                        new RedirectViewModel
-                        {
-                            RedirectUrl = result.RedirectUri
-                        }
-                    );
-                }
-
                 return Redirect(
                     result.RedirectUri
                 );
@@ -116,7 +101,8 @@
 
         public void MergeIntoPage(
             ConsentViewModel viewModel
-        ) {
+        )
+        {
             ClientName = viewModel.ClientName;
             ClientUrl = viewModel.ClientUrl;
             ClientLogoUrl = viewModel.ClientLogoUrl;
@@ -125,6 +111,7 @@
             ResourceScopes = viewModel.ResourceScopes;
             Button = viewModel.Button;
             ScopesConsented = viewModel.ScopesConsented;
+            Description = viewModel.Description;
             RememberConsent = viewModel.RememberConsent;
             ReturnUrl = viewModel.ReturnUrl;
         }
@@ -138,7 +125,7 @@
             {
                 <div class="client-logo"><img src="@Model.ClientLogoUrl"></div>
             }
-            <h1 class="page-title">
+            <h1 id="page-title" class="page-title">
                 @Model.ClientName
                 <small>is requesting your permission</small>
             </h1>
@@ -152,16 +139,16 @@
             <form asp-page="./Index" method="POST" class="consent-form">
                 <input type="hidden" asp-for="ReturnUrl" />
 
-                <div class="consent-page-description">Uncheck the permissions you do not wish to grant.</div>
-                
+                <div class="consent-page-description" data-selector="description">Uncheck the permissions you do not wish to grant.</div>
+
                 @if (Model.IdentityScopes.Any())
                 {
                     <div class="panel panel-default consent-buttons personal-info">
-                        <div class="panel-heading">
+                        <div class="panel-heading" data-selector="personal-info-heading">
                             <span class="glyphicon glyphicon-user"></span>
                             Personal Information
                         </div>
-                        <ul class="list-group">
+                        <ul class="list-group" data-selector="personal-info-scopes">
                             @foreach (var scope in Model.IdentityScopes)
                             {
                                 @await Html.PartialAsync("_ScopeListItem", scope)
@@ -173,11 +160,11 @@
                 @if (Model.ResourceScopes.Any())
                 {
                     <div class="panel panel-default application-access">
-                        <div class="panel-heading">
+                        <div class="panel-heading" data-selector="application-access-heading">
                             <span class="glyphicon glyphicon-tasks"></span>
                             Application Access
                         </div>
-                        <ul class="list-group">
+                        <ul class="list-group" data-selector="application-access-scopes">
                             @foreach (var scope in Model.ResourceScopes)
                             {
                                 @await Html.PartialAsync("_ScopeListItem", scope)
@@ -186,11 +173,23 @@
                     </div>
                 }
 
+                <div class="form-group">
+                    <div class="card">
+                        <div class="card-header" data-selector="access-description-label">
+                            <span class="glyphicon glyphicon-tasks"></span>
+                            Description
+                        </div>
+                        <div class="card-body">
+                            <input class="form-control" placeholder="Description or name of device" asp-for="Description" autofocus data-selector="access-description">
+                        </div>
+                    </div>
+                </div>
+
                 @if (Model.AllowRememberConsent)
                 {
                     <div class="consent-remember">
-                        <label>
-                            <input class="consent-scopecheck" asp-for="RememberConsent" />
+                        <label data-selector="remember-decision-label">
+                            <input class="consent-scopecheck" asp-for="RememberConsent" data-selector="remember-decision" />
                             <strong>Remember My Decision</strong>
                         </label>
                     </div>

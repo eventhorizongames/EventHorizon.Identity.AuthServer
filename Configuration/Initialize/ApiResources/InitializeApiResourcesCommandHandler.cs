@@ -30,12 +30,21 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.ApiResources
             CancellationToken cancellationToken
         )
         {
-            if (!_context.ApiResources.Any())
+            if (!_context.ApiResources.Any()
+                && !_context.ApiScopes.Any())
             {
-                foreach (var resource in GetApiResources())
+                var (apiResourceList, apiScopeList) = GetApiResources();
+
+                foreach (var resource in apiResourceList)
                 {
                     _context.ApiResources.Add(
                         resource.ToEntity()
+                    );
+                }
+                foreach (var scope in apiScopeList)
+                {
+                    _context.ApiScopes.Add(
+                        scope.ToEntity()
                     );
                 }
                 _context.SaveChanges();
@@ -45,7 +54,7 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.ApiResources
             );
         }
 
-        private IEnumerable<ApiResource> GetApiResources()
+        private (IEnumerable<ApiResource>, IEnumerable<ApiScope>) GetApiResources()
         {
             var apiResourceConfiguration = new ConfigurationBuilder()
                 .SetBasePath(
@@ -63,11 +72,20 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.ApiResources
                 apiResourceFile
             );
 
-            return apiResourceFile.ApiResources.Select(
-                resource => new ApiResource(
-                    resource.Name,
-                    resource.DisplayName,
-                    resource.ClaimTypes
+            return (
+                apiResourceFile.ApiResources.Select(
+                    resource => new ApiResource(
+                        resource.Name,
+                        resource.DisplayName
+                    )
+                    {
+                        Scopes = resource.ClaimTypes
+                    }
+                ),
+                apiResourceFile.ApiResources.SelectMany(
+                    a => a.ClaimTypes
+                ).Select(
+                    a => new ApiScope(a)
                 )
             );
         }

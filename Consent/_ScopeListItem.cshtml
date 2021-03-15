@@ -1,7 +1,7 @@
 ﻿@model EventHorizon.Identity.AuthServer.Consent.Models.ScopeViewModel;
 
-<li class="list-group-item">
-    <label>
+<li class="scope list-group-item" data-key="scopes_@Model.Name">
+    <label data-selector="scope-label">
         <input class="consent-scopecheck"
                type="checkbox"
                name="ScopesConsented"

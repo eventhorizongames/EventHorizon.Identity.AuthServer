@@ -56,29 +56,13 @@ namespace EventHorizon.Identity.AuthServer.Consent.Build
             }
 
             var client = await _clientStore.FindEnabledClientByIdAsync(
-                request.ClientId
+                request.Client.ClientId
             );
             if (client == null)
             {
                 _logger.LogError(
                     "Invalid client id: {0}",
-                    request.ClientId
-                );
-                return null;
-            }
-
-            var resources = await _resourceStore.FindEnabledResourcesByScopeAsync(
-                request.ScopesRequested
-            );
-            if (resources == null
-                || (!resources.IdentityResources.Any() && !resources.ApiResources.Any())
-            )
-            {
-                _logger.LogError(
-                    "No scopes matching: {0}",
-                    request.ScopesRequested.Aggregate(
-                        (x, y) => x + ", " + y
-                    )
+                    request.Client.ClientId
                 );
                 return null;
             }
@@ -89,8 +73,9 @@ namespace EventHorizon.Identity.AuthServer.Consent.Build
                     returnUrl,
                     request,
                     client,
-                    resources
-                )
+                    request.ValidatedResources.Resources
+                ),
+                cancellationToken
             );
         }
     }

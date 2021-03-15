@@ -17,6 +17,7 @@ namespace EventHorizon.Identity.AuthServer.Consent.Create
         {
             var result = new ConsentViewModel
             {
+                Description = request.Model?.Description ?? string.Empty,
                 RememberConsent = request.Model?.RememberConsent ?? true,
                 ScopesConsented = request.Model?.ScopesConsented ?? Enumerable.Empty<string>(),
 
@@ -36,9 +37,7 @@ namespace EventHorizon.Identity.AuthServer.Consent.Create
                 )
             ).ToArray();
 
-            result.ResourceScopes = request.Resources.ApiResources.SelectMany(
-                x => x.Scopes
-            ).Select(
+            result.ResourceScopes = request.Resources.ApiScopes.Select(
                 x => CreateScopeViewModel(
                     x,
                     result.ScopesConsented.Contains(
@@ -83,7 +82,7 @@ namespace EventHorizon.Identity.AuthServer.Consent.Create
         }
 
         public ScopeViewModel CreateScopeViewModel(
-            Scope scope,
+            ApiScope scope,
             bool check
         )
         {

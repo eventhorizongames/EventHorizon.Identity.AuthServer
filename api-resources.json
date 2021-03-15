@@ -1,13 +1,9 @@
 {
     "ApiResources": [
         {
-            "Name": "api1",
-            "DisplayName": "Api"
-        },
-        {
             "Name": "roles",
             "DisplayName": "Role",
-            "ClaimTypes": [ "role" ]
+            "ClaimTypes": [ "roles" ]
         },
         {
             "Name": "email",

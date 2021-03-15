@@ -3,42 +3,52 @@
 
 <div class="row grant" data-client-id="@Model.ClientId">
     <div class="col-sm-2">
-        @if (Model.ClientLogoUrl != null) 
+        @if (Model.ClientLogoUrl != null)
         {
-            <img class="client-logo" src="@Model.ClientLogoUrl" />
+            <img class="client-logo" src="@Model.ClientLogoUrl" data-selector="client_logo" />
         }
     </div>
     <div class="col-sm-8">
-        <div class="clientname">@Model.ClientName</div>
-        <div class="created">
-            <span class="grant-label">Created:</span>
+        <div class="clientname" data-selector="client_name">@Model.ClientName</div>
+        <div class="created" data-selector="created">
+            <span class="grant-label" data-selector="created-label">Created:</span>
             @Model.Created.ToString("yyyy-MM-dd")
         </div>
-        @if (Model.Expires.HasValue) 
+        @if (Model.Expires.HasValue)
         {
-            <div class="expires">
-                <span class="grant-label">Expires:</span>
+            <div class="expires" data-selector="expires">
+                <span class="grant-label" data-selector="expires-label">Expires:</span>
                 @Model.Expires.Value.ToString("yyyy-MM-dd")
             </div>
-        } 
-        @if (Model.IdentityGrantNames.Any()) 
+        }
+        @if (Model.IdentityGrantNames.Any())
         {
-            <div class="granttype granttype-identity">
-                <div class="grant-label">Identity Grants</div>
+            <div class="granttype granttype-identity" data-selector="granttype_identity">
+                <div class="grant-label" data-selector="granttype_identity-label">Identity Grants</div>
                 <ul>
-                    @foreach (var name in Model.IdentityGrantNames) {
-                        <li>@name</li>
+                    @foreach (var name in Model.IdentityGrantNames)
+                    {
+                        <li class="granttype_identity_item">
+                            <span data-selector="name">
+                                @name
+                            </span>
+                        </li>
                     }
                 </ul>
             </div>
-        } 
-        @if (Model.ApiGrantNames.Any()) 
+        }
+        @if (Model.ApiGrantNames.Any())
         {
-            <div class="granttype granttype-api">
-                <div class="grant-label">API Grants</div>
+            <div class="granttype granttype-api" data-selector="granttype_api">
+                <div class="grant-label" data-selector="granttype_api-label">API Grants</div>
                 <ul>
-                    @foreach (var name in Model.ApiGrantNames) {
-                        <li>@name</li>
+                    @foreach (var name in Model.ApiGrantNames)
+                    {
+                        <li class="granttype_api_item">
+                            <span data-selector="name">
+                                @name
+                            </span>
+                        </li>
                     }
                 </ul>
             </div>
@@ -47,7 +57,7 @@
     <div class="col-sm-2">
         <form class="client-revoke" asp-page="./Revoke" method="POST">
             <input type="hidden" name="clientId" value="@Model.ClientId" />
-            <button class="btn btn-danger">Revoke Access</button>
+            <button class="btn btn-danger" data-selector="revoke">Revoke Access</button>
         </form>
     </div>
 </div>

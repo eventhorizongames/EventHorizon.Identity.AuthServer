@@ -5,19 +5,19 @@
 }
 
 <div>
-    <h2 id="page-title">@ViewData["Title"]</h2>
-@if (Model.Clients.Any())
-{
-    <ul class="client-list">
-    @foreach (var client in Model.Clients)
+    <h1 id="page-title">@ViewData["Title"]</h1>
+    @if (Model.Clients.Any())
     {
-        <li class="client" data-client-id="@client.ClientId">
-            <span class="client-display">@(client.ClientName + " (" + client.ClientId + ")")</span>
-            <a class="client-edit" asp-page="./Edit/Index" asp-route-id="@client.ClientId">Edit</a>
-            <a class="client-delete" asp-page="./Delete/Index" asp-route-id="@client.ClientId">Delete</a>
-        </li>
+        <ul class="client-list">
+            @foreach (var client in Model.Clients)
+            {
+                <li class="client" data-client-id="@client.ClientId" data-key="@client.ClientId">
+                    <span class="client-display" data-selector="client-display">@(client.ClientName + " (" + client.ClientId + ")")</span>
+                    <a class="client-edit" asp-page="./Edit/Index" asp-route-id="@client.ClientId" data-selector="client-edit">Edit</a>
+                    <a class="client-delete" asp-page="./Delete/Index" asp-route-id="@client.ClientId" data-selector="client-delete">Delete</a>
+                </li>
+            }
+        </ul>
     }
-    </ul>
-}
-    <a id="create-new-client" asp-page="./Create/Index" >Create</a>
+    <a id="create-new-client" asp-page="./Create/Index">Create</a>
 </div>

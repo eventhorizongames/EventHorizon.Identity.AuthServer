@@ -2,7 +2,8 @@
 
 namespace EventHorizon.Identity.AuthServer.Consent.Models
 {
-    public class ConsentViewModel : ConsentInputModel
+    public class ConsentViewModel
+        : ConsentInputModel
     {
         public string ClientName { get; set; }
         public string ClientUrl { get; set; }

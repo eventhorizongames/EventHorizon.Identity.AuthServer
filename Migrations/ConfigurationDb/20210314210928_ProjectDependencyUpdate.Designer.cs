@@ -4,14 +4,16 @@ using EventHorizon.Identity.AuthServer.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace EventHorizon.Identity.AuthServer.Migrations.ConfigurationDb
 {
     [DbContext(typeof(HistoryExtendedConfigurationDbContext))]
-    partial class HistoryExtendedConfigurationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210314210928_ProjectDependencyUpdate")]
+    partial class ProjectDependencyUpdate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -7,11 +7,14 @@
 @using IdentityServer4.Models
 
 @{
+    ViewData["Title"] = "Client Edit";
 }
+
+<h1 id="page-title">@ViewData["Title"]</h1>
 
 <div class="container">
     <a asp-page="../Index">< Back to Client List</a>
-    <h3 id="client-edit-page-title">@Model.Entity.ClientName (@Model.Entity.ClientId)</h3>
+    <h2 id="client-edit-page-title">@Model.Entity.ClientName (@Model.Entity.ClientId)</h2>
     <div class="row">
         <div class="col-md-6">
             <h3>Details</h3>
@@ -51,9 +54,9 @@
             <h3>Client Secrets</h3>
             @foreach (var secret in Model.Entity.ClientSecrets)
             {
-            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@secret.Id" asp-page="./Secret/Remove">
-                <div>@secret.Description @secret.Type @secret.Expiration <button class="btn btn-link" type="submit">Remove</button></div>
-            </form>
+                <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@secret.Id" asp-page="./Secret/Remove">
+                    <div>@secret.Description @secret.Type @secret.Expiration <button class="btn btn-link" type="submit">Remove</button></div>
+                </form>
             }
             <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-page="./Secret/Add">
                 <div class="form-group">
@@ -62,7 +65,7 @@
                 </div>
                 <div class="form-group">
                     <label for="Value">Secret Key</label>
-                    <input name="Value" class="form-control" placeholder="Secret Key" autocomplete="off"/>
+                    <input name="Value" class="form-control" placeholder="Secret Key" autocomplete="off" />
                 </div>
                 <button class="btn btn-default" type="submit">Add</button>
             </form>
@@ -74,9 +77,9 @@
             <h3>Grant Types</h3>
             @foreach (var grant in Model.Entity.AllowedGrantTypes)
             {
-            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@grant.Id" asp-page="./Grant/Remove">
-                <div>@grant.GrantType <button class="btn btn-link" type="submit">Remove</button></div>
-            </form>
+                <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@grant.Id" asp-page="./Grant/Remove">
+                    <div>@grant.GrantType <button class="btn btn-link" type="submit">Remove</button></div>
+                </form>
             }
             <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-page="./Grant/Add">
                 <div class="form-group">
@@ -96,9 +99,9 @@
             <h3>Scopes</h3>
             @foreach (var scope in Model.Entity.AllowedScopes)
             {
-            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@scope.Id" asp-page="./Scope/Remove">
-                <div>@scope.Scope <button class="btn btn-link" type="submit">Remove</button></div>
-            </form>
+                <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@scope.Id" asp-page="./Scope/Remove">
+                    <div>@scope.Scope <button class="btn btn-link" type="submit">Remove</button></div>
+                </form>
             }
             <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-page="./Scope/Add">
                 <div class="form-group">
@@ -110,18 +113,17 @@
                         <option value="@IdentityServerConstants.StandardScopes.Address">Address (@IdentityServerConstants.StandardScopes.Address)</option>
                         <option value="@IdentityServerConstants.StandardScopes.Phone">Phone (@IdentityServerConstants.StandardScopes.Phone)</option>
                         <option value="@IdentityServerConstants.StandardScopes.OfflineAccess">Offline Access (@IdentityServerConstants.StandardScopes.OfflineAccess)</option>
-                    
-                    @foreach (var apiResource in Model.ApiResourceList)
-                    {
-                        <option value="@apiResource.Name">@apiResource.DisplayName (@apiResource.Name)</option>
-                    }
+
+                        @foreach (var apiResource in Model.ApiResourceList)
+                        {
+                            <option value="@apiResource.Name">@apiResource.DisplayName (@apiResource.Name)</option>
+                        }
                     </select>
                 </div>
                 <button class="btn btn-default" type="submit">Add</button>
-                <a class="btn btn-default" type="button" 
-                    asp-page="../../Resource/Create/Index"
-                    asp-route-returnUrl="@Request.GetEncodedPathAndQuery()"
-                >
+                <a class="btn btn-default" type="button"
+                   asp-page="../../Resource/Create/Index"
+                   asp-route-returnUrl="@Request.GetEncodedPathAndQuery()">
                     Create New Scope
                 </a>
             </form>
@@ -133,14 +135,14 @@
             <h3>Post Logout Redirect Uris</h3>
             @foreach (var uri in Model.Entity.PostLogoutRedirectUris)
             {
-            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@uri.Id" asp-page="./PostLogoutRedirectUri/Remove">
-                <div>@uri.PostLogoutRedirectUri <button class="btn btn-link" type="submit">Remove</button></div>
-            </form>
+                <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@uri.Id" asp-page="./PostLogoutRedirectUri/Remove">
+                    <div>@uri.PostLogoutRedirectUri <button class="btn btn-link" type="submit">Remove</button></div>
+                </form>
             }
             <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-page="./PostLogoutRedirectUri/Add">
                 <div class="form-group">
                     <label for="PostLogoutRedirectUri">New Post Logout Redirect Uri</label>
-                    <input name="PostLogoutRedirectUri" class="form-control" placeholder="New Post Logout Redirect Uri" />                    
+                    <input name="PostLogoutRedirectUri" class="form-control" placeholder="New Post Logout Redirect Uri" />
                 </div>
                 <button class="btn btn-default" type="submit">Add</button>
             </form>
@@ -149,14 +151,14 @@
             <h3>Redirect Uris</h3>
             @foreach (var uri in Model.Entity.RedirectUris)
             {
-            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@uri.Id" asp-page="./RedirectUri/Remove">
-                <div>@uri.RedirectUri <button class="btn btn-link" type="submit">Remove</button></div>
-            </form>
+                <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@uri.Id" asp-page="./RedirectUri/Remove">
+                    <div>@uri.RedirectUri <button class="btn btn-link" type="submit">Remove</button></div>
+                </form>
             }
             <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-page="./RedirectUri/Add">
                 <div class="form-group">
                     <label for="RedirectUri">New Redirect Uri</label>
-                    <input name="RedirectUri" class="form-control" placeholder="New Redirect Uri" />                    
+                    <input name="RedirectUri" class="form-control" placeholder="New Redirect Uri" />
                 </div>
                 <button class="btn btn-default" type="submit">Add</button>
             </form>
@@ -168,14 +170,14 @@
             <h3>Allowed CORS Origins</h3>
             @foreach (var uri in Model.Entity.AllowedCorsOrigins)
             {
-            <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@uri.Id" asp-page="./CorsOrigin/Remove">
-                <div>@uri.Origin <button class="btn btn-link" type="submit">Remove</button></div>
-            </form>
+                <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-route-id="@uri.Id" asp-page="./CorsOrigin/Remove">
+                    <div>@uri.Origin <button class="btn btn-link" type="submit">Remove</button></div>
+                </form>
             }
             <form method="POST" asp-route-clientId="@Model.Entity.ClientId" asp-page="./CorsOrigin/Add">
                 <div class="form-group">
                     <label for="CorsOrigin">Cors Origin</label>
-                    <input name="CorsOrigin" class="form-control" placeholder="Cors Origin" />                    
+                    <input name="CorsOrigin" class="form-control" placeholder="Cors Origin" />
                 </div>
                 <button class="btn btn-default" type="submit">Add</button>
             </form>

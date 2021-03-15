@@ -99,6 +99,7 @@ namespace EventHorizon.Identity.AuthServer
             var connectionString = Configuration.GetConnectionString("DefaultConnection");
             var migrationsAssembly = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 
+            services.AddDatabaseDeveloperPageExceptionFilter();
             services.AddDbContext<ApplicationDbContext>(options =>
             {
                 if (!isMSSqlConnectionType && HostEnvironment.IsDevelopment())
@@ -262,7 +263,7 @@ namespace EventHorizon.Identity.AuthServer
             if (HostEnvironment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                app.UseMigrationsEndPoint();
             }
             else
             {

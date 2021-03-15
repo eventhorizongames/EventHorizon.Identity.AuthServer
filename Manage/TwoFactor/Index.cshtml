@@ -35,7 +35,7 @@
     }
 }
 
-<h4 id="two-factor-header">@ViewData["Title"]</h4>
+<h2 id="two-factor-header">@ViewData["Title"]</h2>
 @if (Is2faEnabled)
 {
     if (RecoveryCodesLeft == 0)
@@ -64,7 +64,7 @@
     <a asp-page="./GenerateRecoveryCodes" class="btn btn-default">Reset recovery codes</a>
 }
 
-<h5 id="two-factor-sub-header">Authenticator app</h5>
+<h3 id="two-factor-sub-header">Authenticator app</h3>
 @if (!HasAuthenticator)
 {
     <a id="add-two-factor-app" asp-page="./EnableAuthenticator" class="btn btn-default">Add authenticator app</a>

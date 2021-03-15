@@ -34,7 +34,7 @@
             @foreach (var scope in Model.Entity.Scopes)
             {
             <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-route-id="@scope.Id" asp-page="./Scope/Remove">
-                <div>@scope.DisplayName (@scope.Name) <button class="btn btn-link" type="submit">Remove</button></div>
+                <div>@scope.Scope (@scope.Scope) <button class="btn btn-link" type="submit">Remove</button></div>
             </form>
             }
             <form method="POST" asp-route-resourceId="@Model.Entity.Name" asp-page="./Scope/Add">

@@ -3,9 +3,13 @@
 @using EventHorizon.Identity.AuthServer.Configuration;
 @using IdentityServer4.EntityFramework.Entities;
 
+@{
+    ViewData["Title"] = "Client Delete";
+}
+
 @functions {
 
-    public class IndexModel : PageModel 
+    public class IndexModel : PageModel
     {
         readonly HistoryExtendedConfigurationDbContext _configurationDbContext;
         public IndexModel(
@@ -14,7 +18,7 @@
         {
             _configurationDbContext = configurationDbContext;
         }
-        
+
         public Client Entity { get; set; }
 
         public void OnGet(string id)
@@ -27,16 +31,18 @@
         public IActionResult OnPost(
             string id,
             string button
-        ) 
+        )
         {
-            if(button == "cancel") {
+            if (button == "cancel")
+            {
                 return RedirectToPage(
                     "../Index"
                 );
             }
             var entity = _configurationDbContext.Clients
                 .FirstOrDefault(a => a.ClientId == id);
-            if(entity != null) {
+            if (entity != null)
+            {
                 _configurationDbContext.Clients.Remove(
                     entity
                 );
@@ -48,6 +54,8 @@
         }
     }
 }
+
+<h1 id="page-title">@ViewData["Title"]</h1>
 
 <div>
     <a asp-page="../Index">< Back to Client List</a>
