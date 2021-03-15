@@ -282,8 +282,6 @@ namespace EventHorizon.Identity.AuthServer.Migrations.ConfigurationDb
             migrationBuilder.Sql("INSERT INTO ApiResourceScopes (ApiResourceId, Scope) SELECT ApiResourceId, Type FROM ApiResourceClaims");
             // Enable all the ApiScopes, new column and disabled by default.
             migrationBuilder.Sql("UPDATE ApiScopes SET Enabled = 1");
-            // Remove the ApiResourceClaims, we do not need them after the conversion.
-            migrationBuilder.Sql("DELETE FROM ApiResourceClaims");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
