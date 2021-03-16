@@ -76,15 +76,17 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.ApiResources
                 apiResourceFile.ApiResources.Select(
                     resource => new ApiResource(
                         resource.Name,
-                        resource.DisplayName
+                        resource.DisplayName,
+                        resource.ClaimTypes
                     )
                     {
-                        Scopes = resource.ClaimTypes
+                        Scopes = resource.Scopes
                     }
                 ),
                 apiResourceFile.ApiResources.SelectMany(
-                    a => a.ClaimTypes
-                ).Select(
+                    a => a.Scopes
+                ).Distinct()
+                .Select(
                     a => new ApiScope(a)
                 )
             );

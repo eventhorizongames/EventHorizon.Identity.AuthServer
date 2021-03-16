@@ -2,12 +2,14 @@
     "ApiResources": [
         {
             "Name": "roles",
-            "DisplayName": "Role",
-            "ClaimTypes": [ "roles" ]
+            "DisplayName": "Roles",
+            "Scopes": [ "roles" ],
+            "ClaimTypes": [ "role" ]
         },
         {
             "Name": "email",
             "DisplayName": "Email",
+            "Scopes": [ "email" ],
             "ClaimTypes": [ "email" ]
         }
     ]

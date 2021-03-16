@@ -13,7 +13,7 @@ namespace EventHorizon.Identity.AuthServer.Clients.Api
 {
     [ApiController]
     [Route("api/clients/{clientId}/secrets")]
-    [Authorize("Identity Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ClientsSecretsController : ControllerBase
     {
         private readonly IMediator _mediator;

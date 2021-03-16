@@ -11,7 +11,7 @@ namespace EventHorizon.Identity.AuthServer.Clients.Api
 {
     [ApiController]
     [Route("api/clients/{clientId}")]
-    [Authorize("Identity Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ClientsRemoveController : ControllerBase
     {
         private readonly IMediator _mediator;

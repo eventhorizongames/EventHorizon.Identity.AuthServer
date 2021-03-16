@@ -11,6 +11,7 @@ namespace EventHorizon.Identity.AuthServer.Configuration.Initialize.ApiResources
     {
         public string Name { get; set; }
         public string DisplayName { get; set; }
+        public List<string> Scopes { get; set; }
         public List<string> ClaimTypes { get; set; }
     }
 }
