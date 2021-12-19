@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using EventHorizon.Identity.AuthServer.Clients.Models;
 using EventHorizon.Identity.AuthServer.Clients.Services.Add;
 using EventHorizon.Identity.AuthServer.Clients.Services.Remove;
@@ -13,7 +12,7 @@ namespace EventHorizon.Identity.AuthServer.Clients.Api
 {
     [ApiController]
     [Route("api/clients/{clientId}/secrets")]
-    [Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize("SystemAdmin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ClientsSecretsController : ControllerBase
     {
         private readonly IMediator _mediator;

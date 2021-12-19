@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using EventHorizon.Identity.AuthServer.Clients.Services.Remove;
 using EventHorizon.Identity.AuthServer.Models.Commands;
 using MediatR;
@@ -11,7 +10,7 @@ namespace EventHorizon.Identity.AuthServer.Clients.Api
 {
     [ApiController]
     [Route("api/clients/{clientId}")]
-    [Authorize(Roles = "Admin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    [Authorize("SystemAdmin", AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public class ClientsRemoveController : ControllerBase
     {
         private readonly IMediator _mediator;

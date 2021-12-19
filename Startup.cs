@@ -226,8 +226,33 @@ namespace EventHorizon.Identity.AuthServer
 
             services.AddAuthorization(options =>
             {
+                var roleClaimType = "role";
+                var adminRoleName = "Admin";
+                var clientIdClaimType = "client_id";
+                var releaseClientId = Configuration["Release:ClientId"];
+
                 options.AddPolicy("Identity Admin",
-                    policy => policy.RequireClaim(IdentityClaimTypes.PERMISSION, "identity.view", "identity.create", "identity.update"));
+                    policy => policy.RequireClaim(
+                        IdentityClaimTypes.PERMISSION,
+                        "identity.view",
+                        "identity.create",
+                        "identity.update"
+                    )
+                );
+                options.AddPolicy(
+                    "SystemAdmin",
+                    builder => builder
+                        .RequireAuthenticatedUser()
+                        .RequireAssertion(
+                            context => context.User.HasClaim(
+                                roleClaimType,
+                                adminRoleName
+                            ) || context.User.HasClaim(
+                                clientIdClaimType,
+                                releaseClientId
+                            )
+                        )
+                );
             });
             services.AddCors(options =>
             {
