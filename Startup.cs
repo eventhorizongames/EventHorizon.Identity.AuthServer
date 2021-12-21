@@ -119,6 +119,7 @@ namespace EventHorizon.Identity.AuthServer
             var identityServer = services.AddIdentityServer(options =>
                 {
                     options.IssuerUri = Configuration["IssuerUri"] ?? null;
+                    options.UserInteraction.ErrorUrl = "/Error";
                     options.Events.RaiseErrorEvents = true;
                     options.Events.RaiseInformationEvents = true;
                     options.Events.RaiseFailureEvents = true;
@@ -226,7 +227,6 @@ namespace EventHorizon.Identity.AuthServer
 
             services.AddAuthorization(options =>
             {
-                var roleClaimType = "role";
                 var adminRoleName = "Admin";
                 var clientIdClaimType = "client_id";
                 var releaseClientId = Configuration["Release:ClientId"];
@@ -244,8 +244,7 @@ namespace EventHorizon.Identity.AuthServer
                     builder => builder
                         .RequireAuthenticatedUser()
                         .RequireAssertion(
-                            context => context.User.HasClaim(
-                                roleClaimType,
+                            context => context.User.IsInRole(
                                 adminRoleName
                             ) || context.User.HasClaim(
                                 clientIdClaimType,
@@ -302,7 +301,7 @@ namespace EventHorizon.Identity.AuthServer
                 )
             );
 
-            app.UseStatusCodePagesWithRedirects("/StatusCode?code={0}");
+            app.UseStatusCodePagesWithReExecute("/StatusCode", "?code={0}");
 
             app.UseStaticFiles();
 
